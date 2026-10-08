@@ -1,5 +1,6 @@
 package com.plazoleta.plazoleta.domain.spi;
 
+import com.plazoleta.plazoleta.domain.model.Pagina;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 
 import java.util.Optional;
@@ -14,4 +15,7 @@ public interface RestaurantePersistencePort {
 
     // Lo usará HU 3 (Reinel) para comprobar que el restaurante existe.
     Optional<Restaurante> obtenerRestaurantePorId(Long id);
+
+    /** Debe devolver la página pedida, ordenada alfabéticamente por nombre (sin distinguir mayúsculas). */
+    Pagina<Restaurante> listarRestaurantes(int pagina, int tamanio);
 }
