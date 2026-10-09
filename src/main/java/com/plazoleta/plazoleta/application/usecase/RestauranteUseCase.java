@@ -1,8 +1,10 @@
 package com.plazoleta.plazoleta.application.usecase;
 
 import com.plazoleta.plazoleta.domain.api.RestauranteServicePort;
+import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioInvalidoException;
 import com.plazoleta.plazoleta.domain.exception.UsuarioNoEncontradoException;
+import com.plazoleta.plazoleta.domain.model.Pagina;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
@@ -10,9 +12,8 @@ import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.domain.validator.RestauranteValidator;
 
 /**
- * Caso de uso: crear un restaurante.
- * Implementa el puerto de entrada y usa los puertos de salida.
- * No lleva anotaciones de Spring: se registrará como bean desde infrastructure/config.
+ * Casos de uso de restaurante: crear (HU 2) y listar (HU 9).
+ * No lleva anotaciones de Spring: se registra como bean desde infrastructure/config.
  */
 public class RestauranteUseCase implements RestauranteServicePort {
 
@@ -41,5 +42,16 @@ public class RestauranteUseCase implements RestauranteServicePort {
 
         // 3. Todo bien: guardar.
         return restaurantePersistencePort.guardarRestaurante(restaurante);
+    }
+
+    @Override
+    public Pagina<Restaurante> listarRestaurantes(int pagina, int tamanio) {
+        if (pagina < 0) {
+            throw new DomainException("La página no puede ser negativa");
+        }
+        if (tamanio < 1) {
+            throw new DomainException("El tamaño de página debe ser al menos 1");
+        }
+        return restaurantePersistencePort.listarRestaurantes(pagina, tamanio);
     }
 }

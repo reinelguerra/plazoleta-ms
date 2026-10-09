@@ -8,6 +8,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
 /**
  * Traduce las excepciones a respuestas HTTP con el formato ErrorResponse.
  * Spring elige el manejador más específico: UsuarioNoEncontradoException (404)
@@ -38,6 +40,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> jsonInvalido(HttpMessageNotReadableException e) {
         return construir(HttpStatus.BAD_REQUEST, "El cuerpo de la petición no es un JSON válido");
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> parametroInvalido(MethodArgumentTypeMismatchException e) {
+        return construir(HttpStatus.BAD_REQUEST, "El parámetro '" + e.getName() + "' tiene un valor inválido");
     }
 
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {

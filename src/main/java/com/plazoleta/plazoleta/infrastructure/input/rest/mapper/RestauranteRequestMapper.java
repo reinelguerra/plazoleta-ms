@@ -1,6 +1,7 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest.mapper;
 
 import com.plazoleta.plazoleta.domain.model.Restaurante;
+import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteListadoResponse;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteRequest;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteResponse;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ public interface RestauranteRequestMapper {
     Restaurante toModel(RestauranteRequest request);
 
     RestauranteResponse toResponse(Restaurante restaurante);
+
+    RestauranteListadoResponse toListadoResponse(Restaurante restaurante);
 }
