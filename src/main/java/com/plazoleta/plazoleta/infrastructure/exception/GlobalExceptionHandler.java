@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
@@ -21,6 +22,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> usuarioNoEncontrado(UsuarioNoEncontradoException e) {
         return construir(HttpStatus.NOT_FOUND, e.getMessage());
     }
+    @ExceptionHandler(RestauranteNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> restauranteNoEncontrado(RestauranteNoEncontradoException e) {
+        return construir(HttpStatus.NOT_FOUND, e.getMessage());
+       }
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ErrorResponse> reglaDeNegocio(DomainException e) {
