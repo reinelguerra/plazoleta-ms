@@ -1,0 +1,11 @@
+package com.plazoleta.plazoleta.domain.api;
+
+import com.plazoleta.plazoleta.domain.model.Plato;
+
+/**
+ * Puerto de entrada: lo que el mundo exterior puede pedirle a la aplicación sobre los platos.
+ */
+public interface PlatoServicePort {
+
+    Plato crearPlato(Plato plato);
+}
