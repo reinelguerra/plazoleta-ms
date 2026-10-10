@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
+import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 
 /**
  * Traduce las excepciones a respuestas HTTP con el formato ErrorResponse.
@@ -47,7 +50,23 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.BAD_REQUEST, "El parámetro '" + e.getName() + "' tiene un valor inválido");
     }
 
+    @ExceptionHandler(PlatoNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> platoNoEncontrado(PlatoNoEncontradoException e) {
+        return construir(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
+    @ExceptionHandler(PropietarioNoAutorizadoException.class)
+    public ResponseEntity<ErrorResponse> propietarioNoAutorizado(PropietarioNoAutorizadoException e) {
+        return construir(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<ErrorResponse> cabeceraFaltante(MissingRequestHeaderException e) {
+        return construir(HttpStatus.BAD_REQUEST, "Falta la cabecera obligatoria '" + e.getHeaderName() + "'");
+    }
+
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }
+
 }

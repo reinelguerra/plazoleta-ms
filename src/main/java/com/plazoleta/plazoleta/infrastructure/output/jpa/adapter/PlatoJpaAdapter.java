@@ -6,6 +6,8 @@ import com.plazoleta.plazoleta.infrastructure.output.jpa.entity.PlatoEntity;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.mapper.PlatoEntityMapper;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.repository.PlatoRepository;
 
+import java.util.Optional;
+
 public class PlatoJpaAdapter implements PlatoPersistencePort {
 
     private final PlatoRepository platoRepository;
@@ -20,5 +22,10 @@ public class PlatoJpaAdapter implements PlatoPersistencePort {
     public Plato guardarPlato(Plato plato) {
         PlatoEntity guardado = platoRepository.save(platoEntityMapper.toEntity(plato));
         return platoEntityMapper.toModel(guardado);
+    }
+
+    @Override
+    public Optional<Plato> obtenerPlatoPorId(Long id) {
+        return platoRepository.findById(id).map(platoEntityMapper::toModel);
     }
 }
