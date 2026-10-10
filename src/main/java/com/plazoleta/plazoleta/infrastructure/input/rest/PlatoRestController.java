@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoEstadoRequestDto;
 
 @RestController
 @RequestMapping("/api/v1/platos")
@@ -46,5 +47,18 @@ public class PlatoRestController {
         Plato modificado = platoServicePort.modificarPlato(
                 id, platoRestMapper.precioEntero(request.precio()), request.descripcion(), idPropietario);
         return ResponseEntity.ok(platoRestMapper.toResponse(modificado));
+    }
+
+        /**
+     * HU 7: habilita o deshabilita un plato.
+     * PROVISIONAL: el id del propietario llega en una cabecera hasta que exista el JWT (HU 5).
+     */
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<PlatoResponseDto> cambiarEstadoPlato(
+            @PathVariable("id") Long id,
+            @RequestHeader("X-Propietario-Id") Long idPropietario,
+            @RequestBody PlatoEstadoRequestDto request) {
+        Plato actualizado = platoServicePort.cambiarEstadoPlato(id, request.activo(), idPropietario);
+        return ResponseEntity.ok(platoRestMapper.toResponse(actualizado));
     }
 }

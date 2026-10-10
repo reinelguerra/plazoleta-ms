@@ -11,4 +11,7 @@ public interface PlatoServicePort {
 
     /** HU 4: solo se pueden modificar el precio y la descripción, y solo por el propietario del restaurante. */
     Plato modificarPlato(Long idPlato, Integer precio, String descripcion, Long idPropietario);
+
+        /** HU 7: habilita (true) o deshabilita (false) un plato; solo el propietario de su restaurante. */
+    Plato cambiarEstadoPlato(Long idPlato, Boolean activo, Long idPropietario);
 }
