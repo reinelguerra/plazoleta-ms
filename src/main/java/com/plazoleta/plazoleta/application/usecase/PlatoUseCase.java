@@ -14,6 +14,7 @@ public class PlatoUseCase implements PlatoServicePort {
 
     private static final String MSG_PRECIO_INVALIDO = "El precio es obligatorio y debe ser un número entero mayor a 0";
     private static final String MSG_DESCRIPCION_OBLIGATORIA = "La descripción es obligatoria";
+    private static final String MSG_ESTADO_OBLIGATORIO = "El estado del plato es obligatorio";
 
     private final PlatoPersistencePort platoPersistencePort;
     private final RestaurantePersistencePort restaurantePersistencePort;
@@ -45,6 +46,16 @@ public class PlatoUseCase implements PlatoServicePort {
         // 3. Solo cambian el precio y la descripción; el resto del plato queda igual.
         plato.setPrecio(precio);
         plato.setDescripcion(descripcion);
+        return platoPersistencePort.guardarPlato(plato);
+    }
+        @Override
+    public Plato cambiarEstadoPlato(Long idPlato, Boolean activo, Long idPropietario) {
+        if (activo == null) {
+            throw new DomainException(MSG_ESTADO_OBLIGATORIO);
+        }
+
+        Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
+        plato.setActivo(activo);
         return platoPersistencePort.guardarPlato(plato);
     }
 
