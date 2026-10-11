@@ -34,6 +34,7 @@ class PlatoUseCaseTest {
 
     private PlatoUseCase platoUseCase;
 
+    private static final Long ID_PROPIETARIO = 10L;
     @BeforeEach
     void setUp() {
         platoUseCase = new PlatoUseCase(platoPersistencePort, restaurantePersistencePort);
@@ -51,13 +52,15 @@ class PlatoUseCaseTest {
     }
 
     private void restauranteExiste() {
+        Restaurante restaurante = new Restaurante();
+        restaurante.setIdPropietario(ID_PROPIETARIO);
         when(restaurantePersistencePort.obtenerRestaurantePorId(1L))
-                .thenReturn(Optional.of(new Restaurante()));
+                .thenReturn(Optional.of(restaurante));
     }
 
     private void assertValidacion(String mensajeEsperado, Plato plato) {
         DomainException excepcion = assertThrows(DomainException.class,
-                () -> platoUseCase.crearPlato(plato));
+                  () -> platoUseCase.crearPlato(plato, ID_PROPIETARIO));
 
         assertEquals(mensajeEsperado, excepcion.getMessage());
         verifyNoInteractions(platoPersistencePort, restaurantePersistencePort);
@@ -69,7 +72,7 @@ class PlatoUseCaseTest {
         when(platoPersistencePort.guardarPlato(any(Plato.class)))
                 .thenAnswer(invocacion -> invocacion.getArgument(0));
 
-        Plato resultado = platoUseCase.crearPlato(platoValido());
+          Plato resultado = platoUseCase.crearPlato(platoValido(), ID_PROPIETARIO);
 
         assertTrue(resultado.getActivo());
         verify(platoPersistencePort).guardarPlato(resultado);
@@ -83,7 +86,7 @@ class PlatoUseCaseTest {
         when(platoPersistencePort.guardarPlato(any(Plato.class)))
                 .thenAnswer(invocacion -> invocacion.getArgument(0));
 
-        Plato resultado = platoUseCase.crearPlato(plato);
+          Plato resultado = platoUseCase.crearPlato(plato, ID_PROPIETARIO);
 
         assertTrue(resultado.getActivo());
     }
@@ -93,7 +96,7 @@ class PlatoUseCaseTest {
         when(restaurantePersistencePort.obtenerRestaurantePorId(1L)).thenReturn(Optional.empty());
 
         RestauranteNoEncontradoException excepcion = assertThrows(RestauranteNoEncontradoException.class,
-                () -> platoUseCase.crearPlato(platoValido()));
+                 () -> platoUseCase.crearPlato(platoValido(), ID_PROPIETARIO));
 
         assertEquals("No existe un restaurante con id 1", excepcion.getMessage());
         verify(platoPersistencePort, never()).guardarPlato(any(Plato.class));

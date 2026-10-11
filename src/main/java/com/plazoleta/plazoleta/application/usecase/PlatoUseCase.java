@@ -26,10 +26,13 @@ public class PlatoUseCase implements PlatoServicePort {
     }
 
     @Override
-    public Plato crearPlato(Plato plato) {
+    public Plato crearPlato(Plato plato, Long idPropietario) {
         validarPlato(plato);
-        restaurantePersistencePort.obtenerRestaurantePorId(plato.getIdRestaurante())
+        Restaurante restaurante = restaurantePersistencePort.obtenerRestaurantePorId(plato.getIdRestaurante())
                 .orElseThrow(() -> new RestauranteNoEncontradoException(plato.getIdRestaurante()));
+        if (idPropietario == null || !idPropietario.equals(restaurante.getIdPropietario())) {
+            throw new PropietarioNoAutorizadoException();
+        }
         plato.setActivo(true);
         return platoPersistencePort.guardarPlato(plato);
     }
