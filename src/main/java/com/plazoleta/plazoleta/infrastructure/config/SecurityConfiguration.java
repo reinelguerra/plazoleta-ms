@@ -1,11 +1,13 @@
 package com.plazoleta.plazoleta.infrastructure.config;
 
+import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import com.plazoleta.plazoleta.infrastructure.security.JwtAuthenticationFilter;
 import com.plazoleta.plazoleta.infrastructure.security.JwtTokenParser;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,11 +20,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Seguridad de plazoleta-ms: sin sesión, autenticación por JWT y errores con el formato acordado.
- * (Las reglas por rol de cada endpoint llegan en la siguiente etapa.)
+ * Seguridad de plazoleta-ms: sin sesión, autenticación por JWT, permisos por rol
+ * y errores con el formato acordado.
  */
 @Configuration
 public class SecurityConfiguration {
+
+    private static final String RUTA_RESTAURANTES = "/api/v1/restaurantes";
+    private static final String RUTA_PLATOS = "/api/v1/platos";
 
     @Bean
     public JwtTokenParser jwtTokenParser(@Value("${jwt.secret}") String secreto) {
@@ -43,6 +48,17 @@ public class SecurityConfiguration {
                                 rutas.matcher("/swagger-ui.html"),
                                 rutas.matcher("/v3/api-docs/**"),
                                 rutas.matcher("/h2-console/**")).permitAll()
+                        // HU 2: solo el administrador crea restaurantes
+                        .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_RESTAURANTES))
+                                .hasRole(RolUsuario.ADMINISTRADOR.name())
+                        // HU 9: los clientes listan los restaurantes
+                        .requestMatchers(rutas.matcher(HttpMethod.GET, RUTA_RESTAURANTES))
+                                .hasRole(RolUsuario.CLIENTE.name())
+                        // HU 3, 4 y 7: solo el propietario crea y modifica platos
+                        .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_PLATOS))
+                                .hasRole(RolUsuario.PROPIETARIO.name())
+                        .requestMatchers(rutas.matcher(HttpMethod.PATCH, RUTA_PLATOS + "/**"))
+                                .hasRole(RolUsuario.PROPIETARIO.name())
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenParser),
                         UsernamePasswordAuthenticationFilter.class)

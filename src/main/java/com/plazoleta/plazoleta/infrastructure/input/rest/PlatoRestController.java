@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
+import com.plazoleta.plazoleta.infrastructure.security.UsuarioAutenticado;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoEstadoRequestDto;
@@ -36,29 +37,25 @@ public class PlatoRestController {
     }
 
     /**
-     * HU 4: modifica solo precio y descripción.
-     * PROVISIONAL: el id del propietario llega en una cabecera hasta que exista el JWT (HU 5).
-     */
+         /** HU 4: modifica solo precio y descripción. El propietario sale del token. */
     @PatchMapping("/{id}")
     public ResponseEntity<PlatoResponseDto> modificarPlato(
             @PathVariable("id") Long id,
-            @RequestHeader("X-Propietario-Id") Long idPropietario,
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
             @RequestBody PlatoModificacionRequestDto request) {
         Plato modificado = platoServicePort.modificarPlato(
-                id, platoRestMapper.precioEntero(request.precio()), request.descripcion(), idPropietario);
+                id, platoRestMapper.precioEntero(request.precio()), request.descripcion(), usuario.id());
         return ResponseEntity.ok(platoRestMapper.toResponse(modificado));
     }
 
         /**
-     * HU 7: habilita o deshabilita un plato.
-     * PROVISIONAL: el id del propietario llega en una cabecera hasta que exista el JWT (HU 5).
-     */
+         /** HU 7: habilita o deshabilita un plato. El propietario sale del token. */
     @PatchMapping("/{id}/estado")
     public ResponseEntity<PlatoResponseDto> cambiarEstadoPlato(
             @PathVariable("id") Long id,
-            @RequestHeader("X-Propietario-Id") Long idPropietario,
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
             @RequestBody PlatoEstadoRequestDto request) {
-        Plato actualizado = platoServicePort.cambiarEstadoPlato(id, request.activo(), idPropietario);
+        Plato actualizado = platoServicePort.cambiarEstadoPlato(id, request.activo(), usuario.id());
         return ResponseEntity.ok(platoRestMapper.toResponse(actualizado));
     }
 }
