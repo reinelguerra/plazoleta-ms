@@ -30,9 +30,16 @@ public class PlatoRestController {
         this.platoRestMapper = platoRestMapper;
     }
 
+    /**
+     * HU 3: crea un plato. Solo el propietario del restaurante puede hacerlo;
+     * su id sale del token, no de una cabecera.
+     */
     @PostMapping
-    public ResponseEntity<PlatoResponseDto> crearPlato(@RequestBody PlatoRequestDto request) {
-        Plato creado = platoServicePort.crearPlato(platoRestMapper.toModel(request));
+    public ResponseEntity<PlatoResponseDto> crearPlato(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @RequestBody PlatoRequestDto request) {
+        Long idPropietario = usuario == null ? null : usuario.id();
+        Plato creado = platoServicePort.crearPlato(platoRestMapper.toModel(request), idPropietario);
         return ResponseEntity.status(HttpStatus.CREATED).body(platoRestMapper.toResponse(creado));
     }
 

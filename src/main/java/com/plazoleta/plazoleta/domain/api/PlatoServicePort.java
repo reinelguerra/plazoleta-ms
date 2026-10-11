@@ -7,7 +7,7 @@ import com.plazoleta.plazoleta.domain.model.Plato;
  */
 public interface PlatoServicePort {
 
-    Plato crearPlato(Plato plato);
+    Plato crearPlato(Plato plato, Long idPropietario);
 
     /** HU 4: solo se pueden modificar el precio y la descripción, y solo por el propietario del restaurante. */
     Plato modificarPlato(Long idPlato, Integer precio, String descripcion, Long idPropietario);
