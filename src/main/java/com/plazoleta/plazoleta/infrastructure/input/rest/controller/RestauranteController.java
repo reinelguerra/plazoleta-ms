@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,12 +38,10 @@ import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi
 @RestController
 @RequestMapping("/api/v1/restaurantes")
 @Tag(name = "Restaurantes", description = "Creación y consulta de restaurantes")
-@ApiResponses({
-        @ApiResponse(responseCode = "401", description = NO_AUTENTICADO,
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-        @ApiResponse(responseCode = "403", description = SIN_PERMISO,
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-})
+@ApiResponse(responseCode = "401", description = NO_AUTENTICADO,
+        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+@ApiResponse(responseCode = "403", description = SIN_PERMISO,
+        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 public class RestauranteController {
 
     private final RestauranteServicePort restauranteServicePort;
@@ -60,14 +57,12 @@ public class RestauranteController {
             description = "Solo el ADMINISTRADOR. Reglas: el nombre no puede ser solo números, el NIT es "
                     + "numérico, el teléfono tiene máximo 13 caracteres (puede empezar con +) y el propietario "
                     + "debe existir en usuarios-ms con rol PROPIETARIO.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "400", description = DATOS_INVALIDOS,
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "El propietario indicado no existe en usuarios-ms",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "503", description = USUARIOS_NO_DISPONIBLE,
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
+    @ApiResponse(responseCode = "400", description = DATOS_INVALIDOS,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "El propietario indicado no existe en usuarios-ms",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503", description = USUARIOS_NO_DISPONIBLE,
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ResponseEntity<RestauranteResponse> crearRestaurante(@RequestBody RestauranteRequest request) {
@@ -80,11 +75,9 @@ public class RestauranteController {
     @Operation(summary = "Listar restaurantes",
             description = "Solo el CLIENTE. Devuelve únicamente el nombre y el logo, ordenados "
                     + "alfabéticamente por nombre (sin distinguir mayúsculas) y paginados.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "400",
-                    description = "Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
+    @ApiResponse(responseCode = "400",
+            description = "Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @GetMapping
     public ResponseEntity<PaginaResponse<RestauranteListadoResponse>> listarRestaurantes(
             @Parameter(description = "Número de página, empezando en 0", example = "0")
