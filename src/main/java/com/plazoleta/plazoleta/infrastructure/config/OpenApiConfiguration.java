@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.context.annotation.Configuration;
 
 /** Información general de la API y el botón "Authorize" para probar con un token JWT. */
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
                 description = "Restaurantes y platos de la plazoleta de comidas. "
                         + "Todos los endpoints exigen un token JWT, que se obtiene en usuarios-ms "
                         + "con POST /api/v1/auth/login."),
+        servers = @Server(url = "http://localhost:8082", description = "Servidor local"),
         security = @SecurityRequirement(name = "bearerAuth"))
 @SecurityScheme(
         name = "bearerAuth",
