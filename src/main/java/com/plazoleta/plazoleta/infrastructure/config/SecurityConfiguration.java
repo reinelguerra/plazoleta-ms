@@ -15,7 +15,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
-
+import org.springframework.security.config.Customizer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Configuration
 public class SecurityConfiguration {
+   
 
     private static final String RUTA_RESTAURANTES = "/api/v1/restaurantes";
     private static final String RUTA_PLATOS = "/api/v1/platos";
@@ -38,7 +39,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenParser jwtTokenParser)
             throws Exception {
         PathPatternRequestMatcher.Builder rutas = PathPatternRequestMatcher.withDefaults();
-
+        http.cors(Customizer.withDefaults());        
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(cabeceras -> cabeceras.frameOptions(marco -> marco.sameOrigin()))
