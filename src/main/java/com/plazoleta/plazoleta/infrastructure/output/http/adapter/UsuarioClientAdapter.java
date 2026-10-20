@@ -11,10 +11,7 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.Optional;
 
-/**
- * Adaptador de salida: implementa el puerto del dominio llamando por HTTP a usuarios-ms.
- * Contrato acordado: GET /usuarios/{id} -> 200 con { id, nombre, correo, rol } | 404 si no existe.
- */
+
 @Component
 public class UsuarioClientAdapter implements UsuarioClientPort {
 
@@ -38,14 +35,11 @@ public class UsuarioClientAdapter implements UsuarioClientPort {
             return Optional.of(RolUsuario.valueOf(usuario.rol()));
 
         } catch (HttpClientErrorException.NotFound e) {
-            // 404: el usuario no existe
             return Optional.empty();
         } catch (RestClientException e) {
-            // servidor caído, 5xx u otro error HTTP inesperado
             throw new ServicioUsuariosNoDisponibleException(
                     "No fue posible consultar el servicio de usuarios", e);
         } catch (IllegalArgumentException e) {
-            // el rol que llegó no existe en nuestro enum
             throw new ServicioUsuariosNoDisponibleException(
                     "El servicio de usuarios devolvió un rol desconocido", e);
         }

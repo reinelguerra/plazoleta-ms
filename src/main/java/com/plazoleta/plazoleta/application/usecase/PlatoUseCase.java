@@ -39,14 +39,11 @@ public class PlatoUseCase implements PlatoServicePort {
 
     @Override
     public Plato modificarPlato(Long idPlato, Integer precio, String descripcion, Long idPropietario) {
-        // 1. Los datos nuevos deben ser válidos (no necesita consultar nada).
         validarPrecio(precio);
         validarDescripcion(descripcion);
 
-        // 2. El plato debe existir y ser de un restaurante del solicitante.
         Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
 
-        // 3. Solo cambian el precio y la descripción; el resto del plato queda igual.
         plato.setPrecio(precio);
         plato.setDescripcion(descripcion);
         return platoPersistencePort.guardarPlato(plato);

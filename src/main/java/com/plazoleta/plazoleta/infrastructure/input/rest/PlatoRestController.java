@@ -45,10 +45,7 @@ public class PlatoRestController {
         this.platoRestMapper = platoRestMapper;
     }
 
-    /**
-     * HU 3: crea un plato. Solo el propietario del restaurante puede hacerlo;
-     * su id sale del token, no de una cabecera.
-     */
+
     @Operation(summary = "Crear un plato",
             description = "Solo el PROPIETARIO del restaurante al que se asigna el plato. El plato nace activo. "
                     + "Reglas: nombre, descripción, URL de imagen y categoría son obligatorios y "
@@ -67,7 +64,6 @@ public class PlatoRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(platoRestMapper.toResponse(creado));
     }
 
-    /** HU 4: modifica solo precio y descripción. El propietario sale del token. */
     @Operation(summary = "Modificar un plato",
             description = "Solo el PROPIETARIO del restaurante del plato. Únicamente se pueden cambiar el "
                     + "precio (entero mayor a 0) y la descripción; el resto del plato no se toca.")
@@ -87,7 +83,6 @@ public class PlatoRestController {
         return ResponseEntity.ok(platoRestMapper.toResponse(modificado));
     }
 
-    /** HU 7: habilita o deshabilita un plato. El propietario sale del token. */
     @Operation(summary = "Habilitar o deshabilitar un plato",
             description = "Solo el PROPIETARIO del restaurante del plato. activo = true lo habilita y "
                     + "activo = false lo deshabilita. No se pueden tocar platos de otros restaurantes.")
