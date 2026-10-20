@@ -10,10 +10,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-/**
- * Verifica la firma de un JWT y extrae quién es el usuario.
- * La clave es la MISMA que usa usuarios-ms para firmar (variable de entorno JWT_SECRET).
- */
+
 public class JwtTokenParser {
 
     private static final int LONGITUD_MINIMA_CLAVE = 32;

@@ -5,20 +5,15 @@ import com.plazoleta.plazoleta.domain.model.Restaurante;
 
 import java.util.regex.Pattern;
 
-/**
- * Reglas de negocio de un Restaurante que NO necesitan base de datos ni otros servicios.
- * Se llamará desde el caso de uso (el lunes/martes) antes de guardar.
- */
+
 public final class RestauranteValidator {
 
-    // Solo dígitos (el NIT es numérico).
+    
     private static final Pattern SOLO_DIGITOS = Pattern.compile("\\d+");
 
-    // Teléfono: opcionalmente empieza con '+', luego solo dígitos. Máximo 13 caracteres en total.
     private static final Pattern TELEFONO = Pattern.compile("^\\+?\\d{1,12}$");
 
     private RestauranteValidator() {
-        // Clase de utilidad: no se instancia.
     }
 
     public static void validar(Restaurante restaurante) {

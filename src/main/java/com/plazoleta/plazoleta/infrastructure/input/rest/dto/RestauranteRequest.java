@@ -4,10 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-/**
- * Cuerpo del POST /api/v1/restaurantes.
- * No incluye id: lo genera la base de datos.
- */
 @Schema(description = "Datos para crear un restaurante")
 public record RestauranteRequest(
         @Schema(description = "Nombre del restaurante. Puede incluir números, pero no estar formado solo por números",

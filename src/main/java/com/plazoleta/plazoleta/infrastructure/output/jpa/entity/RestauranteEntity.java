@@ -7,10 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- * Representación del restaurante en la base de datos.
- * Las anotaciones de JPA viven aquí (infraestructura), nunca en el dominio.
- */
+
 @Entity
 @Table(name = "restaurantes")
 public class RestauranteEntity {

@@ -32,9 +32,7 @@ import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.SIN_PERMISO;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.USUARIOS_NO_DISPONIBLE;
 
-/**
- * Adaptador de entrada REST: traduce HTTP a llamadas al puerto del dominio.
- */
+
 @RestController
 @RequestMapping("/api/v1/restaurantes")
 @Tag(name = "Restaurantes", description = "Creación y consulta de restaurantes")

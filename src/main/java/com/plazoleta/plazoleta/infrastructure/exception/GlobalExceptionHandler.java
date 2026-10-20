@@ -13,11 +13,7 @@ import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 
-/**
- * Traduce las excepciones a respuestas HTTP con el formato ErrorResponse.
- * Spring elige el manejador más específico: UsuarioNoEncontradoException (404)
- * gana sobre DomainException (400), de la que hereda.
- */
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 

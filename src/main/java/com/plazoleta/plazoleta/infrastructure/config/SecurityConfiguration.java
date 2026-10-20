@@ -19,10 +19,7 @@ import org.springframework.security.config.Customizer;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Seguridad de plazoleta-ms: sin sesión, autenticación por JWT, permisos por rol
- * y errores con el formato acordado.
- */
+
 @Configuration
 public class SecurityConfiguration {
    
@@ -49,13 +46,10 @@ public class SecurityConfiguration {
                                 rutas.matcher("/swagger-ui.html"),
                                 rutas.matcher("/v3/api-docs/**"),
                                 rutas.matcher("/h2-console/**")).permitAll()
-                        // HU 2: solo el administrador crea restaurantes
                         .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_RESTAURANTES))
                                 .hasRole(RolUsuario.ADMINISTRADOR.name())
-                        // HU 9: los clientes listan los restaurantes
                         .requestMatchers(rutas.matcher(HttpMethod.GET, RUTA_RESTAURANTES))
                                 .hasRole(RolUsuario.CLIENTE.name())
-                        // HU 3, 4 y 7: solo el propietario crea y modifica platos
                         .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_PLATOS))
                                 .hasRole(RolUsuario.PROPIETARIO.name())
                         .requestMatchers(rutas.matcher(HttpMethod.PATCH, RUTA_PLATOS + "/**"))

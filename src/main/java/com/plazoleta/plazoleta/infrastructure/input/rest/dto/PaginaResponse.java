@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
 
-/** Envoltorio genérico para respuestas paginadas. */
 @Schema(description = "Resultado paginado")
 public record PaginaResponse<T>(
         @Schema(description = "Elementos de la página actual") List<T> contenido,

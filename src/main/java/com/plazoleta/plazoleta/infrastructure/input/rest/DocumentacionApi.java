@@ -1,6 +1,5 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest;
 
-/** Textos de la documentación OpenAPI que se repiten en varios endpoints. */
 public final class DocumentacionApi {
 
     public static final String NO_AUTENTICADO = "No autenticado: falta el token o no es válido";
@@ -12,6 +11,5 @@ public final class DocumentacionApi {
     public static final String USUARIOS_NO_DISPONIBLE = "El servicio de usuarios no está disponible";
 
     private DocumentacionApi() {
-        // Clase de constantes: no se instancia.
     }
 }

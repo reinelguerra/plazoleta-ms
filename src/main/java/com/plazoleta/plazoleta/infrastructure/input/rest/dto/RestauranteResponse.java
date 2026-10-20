@@ -2,7 +2,6 @@ package com.plazoleta.plazoleta.infrastructure.input.rest.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-/** Lo que devuelve la API al crear un restaurante. */
 @Schema(description = "Restaurante creado")
 public record RestauranteResponse(
         @Schema(description = "Identificador generado", example = "1") Long id,

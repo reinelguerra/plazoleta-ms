@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Adaptador de salida: implementa el puerto del dominio usando JPA.
- * Es la única clase que sabe que detrás hay una base de datos.
- */
+
 @Component
 public class RestaurantePersistenceAdapter implements RestaurantePersistencePort {
 
@@ -45,7 +42,6 @@ public class RestaurantePersistenceAdapter implements RestaurantePersistencePort
 
     @Override
     public Pagina<Restaurante> listarRestaurantes(int pagina, int tamanio) {
-        // Alfabético por nombre, sin distinguir mayúsculas (si no, "Zeta" iría antes que "alfa").
         Pageable pageable = PageRequest.of(pagina, tamanio, Sort.by(Sort.Order.asc("nombre").ignoreCase()));
         Page<RestauranteEntity> resultado = restauranteRepository.findAll(pageable);
 

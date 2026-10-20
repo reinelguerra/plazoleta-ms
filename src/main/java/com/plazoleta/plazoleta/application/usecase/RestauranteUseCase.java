@@ -11,10 +11,7 @@ import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.domain.validator.RestauranteValidator;
 
-/**
- * Casos de uso de restaurante: crear (HU 2) y listar (HU 9).
- * No lleva anotaciones de Spring: se registra como bean desde infrastructure/config.
- */
+
 public class RestauranteUseCase implements RestauranteServicePort {
 
     private final RestaurantePersistencePort restaurantePersistencePort;
@@ -28,10 +25,8 @@ public class RestauranteUseCase implements RestauranteServicePort {
 
     @Override
     public Restaurante crearRestaurante(Restaurante restaurante) {
-        // 1. Reglas de los datos (no necesitan nada externo).
         RestauranteValidator.validar(restaurante);
 
-        // 2. El propietario debe existir en Usuarios y tener rol PROPIETARIO.
         Long idPropietario = restaurante.getIdPropietario();
         RolUsuario rol = usuarioClientPort.obtenerRolPorId(idPropietario)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(idPropietario));
@@ -40,7 +35,6 @@ public class RestauranteUseCase implements RestauranteServicePort {
             throw new PropietarioInvalidoException(idPropietario);
         }
 
-        // 3. Todo bien: guardar.
         return restaurantePersistencePort.guardarRestaurante(restaurante);
     }
 

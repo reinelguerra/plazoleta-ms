@@ -13,10 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * Lee "Authorization: Bearer <token>". Si el token es válido, deja al usuario autenticado
- * con su rol. Si no, no autentica nada: Spring Security responderá 401 en las rutas protegidas.
- */
+
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String PREFIJO = "Bearer ";

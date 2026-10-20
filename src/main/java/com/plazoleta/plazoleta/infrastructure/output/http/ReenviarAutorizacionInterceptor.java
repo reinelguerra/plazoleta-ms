@@ -10,11 +10,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.io.IOException;
 
-/**
- * Copia la cabecera Authorization de la petición que está atendiendo plazoleta-ms
- * hacia las llamadas que este servicio hace a usuarios-ms.
- * Si no hay petición en curso o no trae token, no agrega nada.
- */
+
 public class ReenviarAutorizacionInterceptor implements ClientHttpRequestInterceptor {
 
     @Override
