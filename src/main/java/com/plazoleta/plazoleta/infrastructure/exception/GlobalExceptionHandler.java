@@ -65,4 +65,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }
 
+        @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> datosInvalidos(
+            org.springframework.web.bind.MethodArgumentNotValidException e) {
+        String mensaje = e.getBindingResult().getFieldErrors().stream()
+                .map(org.springframework.validation.FieldError::getDefaultMessage)
+                .distinct()
+                .sorted()
+                .collect(java.util.stream.Collectors.joining("; "));
+        return construir(HttpStatus.BAD_REQUEST, mensaje);
+    }
+
 }
