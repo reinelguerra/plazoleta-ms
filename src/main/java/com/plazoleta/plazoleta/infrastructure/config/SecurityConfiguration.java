@@ -26,6 +26,7 @@ public class SecurityConfiguration {
 
     private static final String RUTA_RESTAURANTES = "/api/v1/restaurantes";
     private static final String RUTA_PLATOS = "/api/v1/platos";
+    private static final String RUTA_PEDIDOS = "/api/v1/pedidos";
 
     @Bean
     public JwtTokenParser jwtTokenParser(@Value("${jwt.secret}") String secreto) {
@@ -51,6 +52,8 @@ public class SecurityConfiguration {
                         .requestMatchers(rutas.matcher(HttpMethod.GET, RUTA_RESTAURANTES))
                                 .hasRole(RolUsuario.CLIENTE.name())
                         .requestMatchers(rutas.matcher(HttpMethod.GET, RUTA_PLATOS + "/**"))
+                                .hasRole(RolUsuario.CLIENTE.name())
+                        .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_PEDIDOS))
                                 .hasRole(RolUsuario.CLIENTE.name())
                         .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_PLATOS))
                                 .hasRole(RolUsuario.PROPIETARIO.name())
