@@ -1,5 +1,6 @@
 package com.plazoleta.plazoleta.domain.api;
 
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Plato;
 
 
@@ -10,4 +11,6 @@ public interface PlatoServicePort {
     Plato modificarPlato(Long idPlato, Integer precio, String descripcion, Long idPropietario);
 
     Plato cambiarEstadoPlato(Long idPlato, Boolean activo, Long idPropietario);
+
+    PaginaRespuesta<Plato> listarPlatos(Long idRestaurante, String categoria, int pagina, int tamanio);
 }

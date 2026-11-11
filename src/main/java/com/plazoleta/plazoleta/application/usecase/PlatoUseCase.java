@@ -9,6 +9,8 @@ import com.plazoleta.plazoleta.domain.model.Plato;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
+import com.plazoleta.plazoleta.domain.util.MensajeError;
 
 public class PlatoUseCase implements PlatoServicePort {
 
@@ -57,6 +59,24 @@ public class PlatoUseCase implements PlatoServicePort {
         Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
         plato.setActivo(activo);
         return platoPersistencePort.guardarPlato(plato);
+    }
+
+        @Override
+    public PaginaRespuesta<Plato> listarPlatos(Long idRestaurante, String categoria, int pagina, int tamanio) {
+        if (idRestaurante == null) {
+            throw new DomainException(MensajeError.RESTAURANTE_OBLIGATORIO);
+        }
+        if (pagina < 0) {
+            throw new DomainException(MensajeError.PAGINA_NEGATIVA);
+        }
+        if (tamanio < 1) {
+            throw new DomainException(MensajeError.TAMANIO_PAGINA_INVALIDO);
+        }
+        restaurantePersistencePort.obtenerRestaurantePorId(idRestaurante)
+                .orElseThrow(() -> new RestauranteNoEncontradoException(idRestaurante));
+
+        String filtro = esVacio(categoria) ? null : categoria.trim();
+        return platoPersistencePort.listarPlatosActivosPorRestaurante(idRestaurante, filtro, pagina, tamanio);
     }
 
     private Plato obtenerPlatoDelPropietario(Long idPlato, Long idPropietario) {

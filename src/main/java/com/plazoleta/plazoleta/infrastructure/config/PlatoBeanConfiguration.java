@@ -1,5 +1,7 @@
 package com.plazoleta.plazoleta.infrastructure.config;
 
+import com.plazoleta.plazoleta.application.handler.PlatoHandler;
+import com.plazoleta.plazoleta.application.handler.PlatoHandlerImpl;
 import com.plazoleta.plazoleta.application.usecase.PlatoUseCase;
 import com.plazoleta.plazoleta.domain.api.PlatoServicePort;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
@@ -23,5 +25,10 @@ public class PlatoBeanConfiguration {
     public PlatoServicePort platoServicePort(PlatoPersistencePort platoPersistencePort,
                                              RestaurantePersistencePort restaurantePersistencePort) {
         return new PlatoUseCase(platoPersistencePort, restaurantePersistencePort);
+    }
+
+    @Bean
+    public PlatoHandler platoHandler(PlatoServicePort platoServicePort) {
+        return new PlatoHandlerImpl(platoServicePort);
     }
 }
