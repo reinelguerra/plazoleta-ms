@@ -1,6 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.output.jpa.adapter;
 
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.entity.RestauranteEntity;
@@ -41,15 +41,15 @@ public class RestaurantePersistenceAdapter implements RestaurantePersistencePort
     }
 
     @Override
-    public Pagina<Restaurante> listarRestaurantes(int pagina, int tamanio) {
-        Pageable pageable = PageRequest.of(pagina, tamanio, Sort.by(Sort.Order.asc("nombre").ignoreCase()));
+    public PaginaRespuesta<Restaurante> listarRestaurantes(int PaginaRespuesta, int tamanio) {
+        Pageable pageable = PageRequest.of(PaginaRespuesta, tamanio, Sort.by(Sort.Order.asc("nombre").ignoreCase()));
         Page<RestauranteEntity> resultado = restauranteRepository.findAll(pageable);
 
         List<Restaurante> contenido = resultado.getContent().stream()
                 .map(restauranteEntityMapper::toModel)
                 .toList();
 
-        return new Pagina<>(contenido, resultado.getNumber(), resultado.getSize(),
+        return new PaginaRespuesta<>(contenido, resultado.getNumber(), resultado.getSize(),
                 resultado.getTotalElements(), resultado.getTotalPages());
     }
 }

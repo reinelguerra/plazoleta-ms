@@ -9,7 +9,8 @@ import com.plazoleta.plazoleta.infrastructure.output.jpa.mapper.RestauranteEntit
 import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
+import com.plazoleta.plazoleta.application.handler.RestauranteHandler;
+import com.plazoleta.plazoleta.application.handler.RestauranteHandlerImpl;
 
 @Configuration
 public class RestauranteBeanConfiguration {
@@ -29,4 +30,10 @@ public class RestauranteBeanConfiguration {
                                                          UsuarioClientPort usuarioClientPort) {
         return new RestauranteUseCase(restaurantePersistencePort, usuarioClientPort);
     }
+
+    @Bean
+public RestauranteHandler restauranteHandler(RestauranteServicePort restauranteServicePort) {
+    return new RestauranteHandlerImpl(restauranteServicePort);
+}
+
 }

@@ -1,6 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest.controller;
 
-import com.plazoleta.plazoleta.domain.api.RestauranteServicePort;
+import com.plazoleta.plazoleta.application.handler.RestauranteHandler;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.UsuarioNoEncontradoException;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
@@ -43,12 +43,12 @@ class RestauranteControllerTest {
             }
             """;
 
-    private RestauranteServicePort servicePort;
+    private RestauranteHandler servicePort;
     private MockMvc mockMvc;
 
     @BeforeEach
     void preparar() {
-        servicePort = mock(RestauranteServicePort.class);
+        servicePort = mock(RestauranteHandler.class);
         RestauranteController controller = new RestauranteController(
                 servicePort, Mappers.getMapper(RestauranteRequestMapper.class));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
