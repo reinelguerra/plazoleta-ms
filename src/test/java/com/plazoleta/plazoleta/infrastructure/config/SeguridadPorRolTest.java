@@ -2,7 +2,7 @@ package com.plazoleta.plazoleta.infrastructure.config;
 
 import com.plazoleta.plazoleta.domain.api.PlatoServicePort;
 import com.plazoleta.plazoleta.domain.api.RestauranteServicePort;
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -63,7 +63,7 @@ class SeguridadPorRolTest {
     @BeforeEach
     void preparar() {
         when(restauranteServicePort.listarRestaurantes(anyInt(), anyInt()))
-                .thenReturn(new Pagina<>(List.of(), 0, 10, 0, 0));
+                .thenReturn(new PaginaRespuesta<>(List.of(), 0, 10, 0, 0));
     }
 
     private String bearer(RolUsuario rol) {

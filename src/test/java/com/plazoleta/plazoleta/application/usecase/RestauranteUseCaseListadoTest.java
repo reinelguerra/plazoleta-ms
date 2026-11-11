@@ -1,7 +1,7 @@
 package com.plazoleta.plazoleta.application.usecase;
 
 import com.plazoleta.plazoleta.domain.exception.DomainException;
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
@@ -33,10 +33,10 @@ class RestauranteUseCaseListadoTest {
 
     @Test
     void parametrosValidos_delegaEnElPuertoYDevuelveLaPagina() {
-        Pagina<Restaurante> esperada = new Pagina<>(List.of(), 2, 5, 0, 0);
+        PaginaRespuesta<Restaurante> esperada = new PaginaRespuesta<>(List.of(), 2, 5, 0, 0);
         when(restaurantePersistencePort.listarRestaurantes(2, 5)).thenReturn(esperada);
 
-        Pagina<Restaurante> resultado = restauranteUseCase.listarRestaurantes(2, 5);
+        PaginaRespuesta<Restaurante> resultado = restauranteUseCase.listarRestaurantes(2, 5);
 
         assertSame(esperada, resultado);
         verify(restaurantePersistencePort).listarRestaurantes(2, 5);

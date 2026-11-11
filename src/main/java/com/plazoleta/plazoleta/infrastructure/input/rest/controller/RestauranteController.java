@@ -1,10 +1,9 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest.controller;
 
-import com.plazoleta.plazoleta.domain.api.RestauranteServicePort;
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.application.handler.RestauranteHandler;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.infrastructure.exception.ErrorResponse;
-import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PaginaResponse;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteListadoResponse;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteRequest;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.RestauranteResponse;
@@ -25,13 +24,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.DATOS_INVALIDOS;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.NO_AUTENTICADO;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.SIN_PERMISO;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.USUARIOS_NO_DISPONIBLE;
-
 
 @RestController
 @RequestMapping("/api/v1/restaurantes")
@@ -42,12 +38,12 @@ import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi
         content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 public class RestauranteController {
 
-    private final RestauranteServicePort restauranteServicePort;
+    private final RestauranteHandler restauranteHandler;
     private final RestauranteRequestMapper restauranteRequestMapper;
 
-    public RestauranteController(RestauranteServicePort restauranteServicePort,
+    public RestauranteController(RestauranteHandler restauranteHandler,
                                  RestauranteRequestMapper restauranteRequestMapper) {
-        this.restauranteServicePort = restauranteServicePort;
+        this.restauranteHandler = restauranteHandler;
         this.restauranteRequestMapper = restauranteRequestMapper;
     }
 
@@ -64,7 +60,7 @@ public class RestauranteController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public ResponseEntity<RestauranteResponse> crearRestaurante(@RequestBody RestauranteRequest request) {
-        Restaurante creado = restauranteServicePort
+        Restaurante creado = restauranteHandler
                 .crearRestaurante(restauranteRequestMapper.toModel(request));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(restauranteRequestMapper.toResponse(creado));
@@ -77,19 +73,14 @@ public class RestauranteController {
             description = "Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1",
             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     @GetMapping
-    public ResponseEntity<PaginaResponse<RestauranteListadoResponse>> listarRestaurantes(
+    public ResponseEntity<PaginaRespuesta<RestauranteListadoResponse>> listarRestaurantes(
             @Parameter(description = "Número de página, empezando en 0", example = "0")
             @RequestParam(name = "pagina", defaultValue = "0") int pagina,
             @Parameter(description = "Cantidad de restaurantes por página (mínimo 1)", example = "10")
             @RequestParam(name = "tamanio", defaultValue = "10") int tamanio) {
 
-        Pagina<Restaurante> resultado = restauranteServicePort.listarRestaurantes(pagina, tamanio);
+        PaginaRespuesta<Restaurante> resultado = restauranteHandler.listarRestaurantes(pagina, tamanio);
 
-        List<RestauranteListadoResponse> contenido = resultado.contenido().stream()
-                .map(restauranteRequestMapper::toListadoResponse)
-                .toList();
-
-        return ResponseEntity.ok(new PaginaResponse<>(contenido, resultado.pagina(), resultado.tamanio(),
-                resultado.totalElementos(), resultado.totalPaginas()));
+        return ResponseEntity.ok(resultado.map(restauranteRequestMapper::toListadoResponse));
     }
 }

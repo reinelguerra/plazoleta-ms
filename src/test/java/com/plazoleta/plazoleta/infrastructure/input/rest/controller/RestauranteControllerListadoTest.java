@@ -1,8 +1,8 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest.controller;
 
-import com.plazoleta.plazoleta.domain.api.RestauranteServicePort;
+import com.plazoleta.plazoleta.application.handler.RestauranteHandler;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.infrastructure.exception.GlobalExceptionHandler;
 import com.plazoleta.plazoleta.infrastructure.input.rest.mapper.RestauranteRequestMapper;
@@ -25,12 +25,12 @@ class RestauranteControllerListadoTest {
 
     private static final String URL = "/api/v1/restaurantes";
 
-    private RestauranteServicePort servicePort;
+    private RestauranteHandler servicePort;
     private MockMvc mockMvc;
 
     @BeforeEach
     void preparar() {
-        servicePort = mock(RestauranteServicePort.class);
+        servicePort = mock(RestauranteHandler.class);
         RestauranteController controller = new RestauranteController(
                 servicePort, Mappers.getMapper(RestauranteRequestMapper.class));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
@@ -45,8 +45,8 @@ class RestauranteControllerListadoTest {
 
     @Test
     void listar_sinParametros_usaPagina0Tamanio10_yDevuelveSoloNombreYLogo() throws Exception {
-        Pagina<Restaurante> pagina = new Pagina<>(List.of(restaurante("Alfa"), restaurante("Beta")), 0, 10, 2, 1);
-        when(servicePort.listarRestaurantes(0, 10)).thenReturn(pagina);
+        PaginaRespuesta<Restaurante> paginaRespuesta = new PaginaRespuesta<>(List.of(restaurante("Alfa"), restaurante("Beta")), 0, 10, 2, 1);
+        when(servicePort.listarRestaurantes(0, 10)).thenReturn(paginaRespuesta);
 
         mockMvc.perform(get(URL))
                 .andExpect(status().isOk())
@@ -63,7 +63,7 @@ class RestauranteControllerListadoTest {
 
     @Test
     void listar_conParametros_losPasaAlCasoDeUso() throws Exception {
-        when(servicePort.listarRestaurantes(2, 5)).thenReturn(new Pagina<>(List.of(), 2, 5, 0, 0));
+        when(servicePort.listarRestaurantes(2, 5)).thenReturn(new PaginaRespuesta<>(List.of(), 2, 5, 0, 0));
 
         mockMvc.perform(get(URL).param("pagina", "2").param("tamanio", "5"))
                 .andExpect(status().isOk())

@@ -1,6 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.output.jpa.adapter;
 
-import com.plazoleta.plazoleta.domain.model.Pagina;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.entity.RestauranteEntity;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.mapper.RestauranteEntityMapper;
@@ -66,12 +66,12 @@ class RestaurantePersistenceAdapterListadoTest {
     void listarRestaurantes_conviertePaginaYContenidoAlModeloDeDominio() {
         RestauranteEntity e1 = new RestauranteEntity();
         RestauranteEntity e2 = new RestauranteEntity();
-        Page<RestauranteEntity> pagina = new PageImpl<>(List.of(e1, e2), PageRequest.of(0, 10), 12);
-        when(restauranteRepository.findAll(any(Pageable.class))).thenReturn(pagina);
+        Page<RestauranteEntity> paginaMock = new PageImpl<>(List.of(e1, e2), PageRequest.of(0, 10), 12);
+        when(restauranteRepository.findAll(any(Pageable.class))).thenReturn(paginaMock);
         when(restauranteEntityMapper.toModel(e1)).thenReturn(restaurante("Alfa"));
         when(restauranteEntityMapper.toModel(e2)).thenReturn(restaurante("Beta"));
 
-        Pagina<Restaurante> resultado = adapter.listarRestaurantes(0, 10);
+        PaginaRespuesta<Restaurante> resultado = adapter.listarRestaurantes(0, 10);
 
         assertEquals(2, resultado.contenido().size());
         assertEquals("Alfa", resultado.contenido().get(0).getNombre());
