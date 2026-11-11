@@ -1,6 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest;
 
-import com.plazoleta.plazoleta.domain.api.PlatoServicePort;
+import com.plazoleta.plazoleta.application.handler.PlatoHandler;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
 import com.plazoleta.plazoleta.domain.model.Plato;
@@ -37,12 +37,12 @@ class PlatoRestControllerModificarTest {
             { "precio": 30000, "descripcion": "Nueva descripcion" }
             """;
 
-    private PlatoServicePort servicePort;
+    private PlatoHandler servicePort;
     private MockMvc mockMvc;
 
     @BeforeEach
     void preparar() {
-        servicePort = mock(PlatoServicePort.class);
+        servicePort = mock(PlatoHandler.class);
         PlatoRestController controller = new PlatoRestController(
                 servicePort, Mappers.getMapper(PlatoRestMapper.class));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)

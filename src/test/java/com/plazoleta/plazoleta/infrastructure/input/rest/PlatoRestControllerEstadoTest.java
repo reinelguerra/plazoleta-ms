@@ -1,6 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.input.rest;
 
-import com.plazoleta.plazoleta.domain.api.PlatoServicePort;
+import com.plazoleta.plazoleta.application.handler.PlatoHandler;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
@@ -35,12 +35,12 @@ class PlatoRestControllerEstadoTest {
     private static final String URL = "/api/v1/platos/5/estado";
     private static final String JSON_DESHABILITAR = "{ \"activo\": false }";
 
-    private PlatoServicePort servicePort;
+    private PlatoHandler servicePort;
     private MockMvc mockMvc;
 
     @BeforeEach
     void preparar() {
-        servicePort = mock(PlatoServicePort.class);
+        servicePort = mock(PlatoHandler.class);
         PlatoRestController controller = new PlatoRestController(
                 servicePort, Mappers.getMapper(PlatoRestMapper.class));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
