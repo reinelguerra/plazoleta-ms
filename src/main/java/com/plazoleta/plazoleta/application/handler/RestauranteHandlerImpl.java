@@ -21,4 +21,9 @@ public class RestauranteHandlerImpl implements RestauranteHandler {
     public PaginaRespuesta<Restaurante> listarRestaurantes(int pagina, int tamanio) {
         return restauranteServicePort.listarRestaurantes(pagina, tamanio);
     }
+
+    @Override
+    public Restaurante obtenerRestaurante(Long id) {
+        return restauranteServicePort.obtenerRestaurante(id);
+    }
 }

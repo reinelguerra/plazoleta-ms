@@ -11,6 +11,7 @@ import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.domain.validator.RestauranteValidator;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
+import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 
 
 public class RestauranteUseCase implements RestauranteServicePort {
@@ -49,4 +50,10 @@ public class RestauranteUseCase implements RestauranteServicePort {
        }
        return restaurantePersistencePort.listarRestaurantes(pagina, tamanio);
    }
+
+       @Override
+    public Restaurante obtenerRestaurante(Long id) {
+        return restaurantePersistencePort.obtenerRestaurantePorId(id)
+                .orElseThrow(() -> new RestauranteNoEncontradoException(id));
+    }
 }

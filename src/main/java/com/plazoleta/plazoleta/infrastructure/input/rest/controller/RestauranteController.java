@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.DATOS_INVALIDOS;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.NO_AUTENTICADO;
@@ -82,5 +83,16 @@ public class RestauranteController {
         PaginaRespuesta<Restaurante> resultado = restauranteHandler.listarRestaurantes(pagina, tamanio);
 
         return ResponseEntity.ok(resultado.map(restauranteRequestMapper::toListadoResponse));
+    }
+
+    @Operation(summary = "Obtener un restaurante por id",
+            description = "Solo PROPIETARIO o ADMINISTRADOR. Lo usa Trazabilidad para comprobar que el "
+                    + "restaurante pertenece al propietario que consulta (campo idPropietario).")
+    @ApiResponse(responseCode = "404", description = "No existe un restaurante con ese id",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @GetMapping("/{id}")
+    public ResponseEntity<RestauranteResponse> obtenerRestaurante(@PathVariable("id") Long id) {
+        Restaurante restaurante = restauranteHandler.obtenerRestaurante(id);
+        return ResponseEntity.ok(restauranteRequestMapper.toResponse(restaurante));
     }
 }
