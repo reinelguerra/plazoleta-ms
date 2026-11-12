@@ -76,11 +76,8 @@ class RestauranteUseCaseTest {
     }
 
     @Test
-    void datosInvalidos_lanzaExcepcionSinConsultarNada() {
-        Restaurante invalido = restauranteValido();
-        invalido.setNombre("12345");
-
-        assertThrows(DomainException.class, () -> restauranteUseCase.crearRestaurante(invalido));
+    void restauranteNulo_lanzaExcepcionSinConsultarNada() {
+        assertThrows(DomainException.class, () -> restauranteUseCase.crearRestaurante(null));
 
         verifyNoInteractions(usuarioClientPort, restaurantePersistencePort);
     }

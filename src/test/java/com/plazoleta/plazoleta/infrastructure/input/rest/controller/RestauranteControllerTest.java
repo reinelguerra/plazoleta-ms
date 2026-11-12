@@ -4,6 +4,7 @@ import com.plazoleta.plazoleta.application.handler.RestauranteHandler;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.UsuarioNoEncontradoException;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
+import com.plazoleta.plazoleta.domain.util.MensajeError;
 import com.plazoleta.plazoleta.infrastructure.exception.GlobalExceptionHandler;
 import com.plazoleta.plazoleta.infrastructure.exception.ServicioUsuariosNoDisponibleException;
 import com.plazoleta.plazoleta.infrastructure.input.rest.mapper.RestauranteRequestMapper;
@@ -19,15 +20,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Prueba del controlador y del manejador de errores sin levantar Spring ni la base de datos.
- * El puerto del dominio es un doble de Mockito.
- */
 class RestauranteControllerTest {
 
     private static final String URL = "/api/v1/restaurantes";
@@ -72,6 +70,89 @@ class RestauranteControllerTest {
         verify(servicePort).crearRestaurante(captor.capture());
         assertEquals(1L, captor.getValue().getIdPropietario());
         assertEquals("900123456", captor.getValue().getNit());
+    }
+
+    @Test
+    void nombreSoloNumeros_devuelve400SinLlamarAlHandler() throws Exception {
+        String jsonInvalido = """
+                {
+                  "nombre": "12345",
+                  "nit": "900123456",
+                  "direccion": "Calle 10 # 5-20",
+                  "telefono": "+573001234567",
+                  "urlLogo": "https://logo.com/sabor.png",
+                  "idPropietario": 1
+                }
+                """;
+
+        mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value(MensajeError.NOMBRE_RESTAURANTE_SOLO_NUMEROS))
+                .andExpect(jsonPath("$.status").value(400));
+
+        verifyNoInteractions(servicePort);
+    }
+
+    @Test
+    void nitNoNumerico_devuelve400SinLlamarAlHandler() throws Exception {
+        String jsonInvalido = """
+                {
+                  "nombre": "Sabor 24",
+                  "nit": "900-123",
+                  "direccion": "Calle 10 # 5-20",
+                  "telefono": "+573001234567",
+                  "urlLogo": "https://logo.com/sabor.png",
+                  "idPropietario": 1
+                }
+                """;
+
+        mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value(MensajeError.NIT_NO_NUMERICO))
+                .andExpect(jsonPath("$.status").value(400));
+
+        verifyNoInteractions(servicePort);
+    }
+
+    @Test
+    void telefonoInvalido_devuelve400SinLlamarAlHandler() throws Exception {
+        String jsonInvalido = """
+                {
+                  "nombre": "Sabor 24",
+                  "nit": "900123456",
+                  "direccion": "Calle 10 # 5-20",
+                  "telefono": "+5730012345678",
+                  "urlLogo": "https://logo.com/sabor.png",
+                  "idPropietario": 1
+                }
+                """;
+
+        mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensaje").value(MensajeError.TELEFONO_RESTAURANTE_INVALIDO))
+                .andExpect(jsonPath("$.status").value(400));
+
+        verifyNoInteractions(servicePort);
+    }
+
+    @Test
+    void camposObligatoriosFaltantes_devuelve400SinLlamarAlHandler() throws Exception {
+        String jsonInvalido = """
+                {
+                  "nombre": "  ",
+                  "nit": "900123456",
+                  "direccion": "Calle 10 # 5-20",
+                  "telefono": "+573001234567",
+                  "urlLogo": "https://logo.com/sabor.png",
+                  "idPropietario": null
+                }
+                """;
+
+        mockMvc.perform(post(URL).contentType(MediaType.APPLICATION_JSON).content(jsonInvalido))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+
+        verifyNoInteractions(servicePort);
     }
 
     @Test
