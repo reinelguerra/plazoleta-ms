@@ -10,6 +10,7 @@ import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
+import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 
 public class RestauranteUseCase implements RestauranteServicePort {
 
@@ -39,14 +40,21 @@ public class RestauranteUseCase implements RestauranteServicePort {
         return restaurantePersistencePort.guardarRestaurante(restaurante);
     }
 
-    @Override
-    public PaginaRespuesta<Restaurante> listarRestaurantes(int pagina, int tamanio) {
-        if (pagina < 0) {
-            throw new DomainException(MensajeError.PAGINA_NEGATIVA);
-        }
-        if (tamanio < 1) {
-            throw new DomainException(MensajeError.TAMANIO_PAGINA_INVALIDO);
-        }
-        return restaurantePersistencePort.listarRestaurantes(pagina, tamanio);
+       @Override
+   public PaginaRespuesta<Restaurante> listarRestaurantes(int pagina, int tamanio) {
+       if (pagina < 0) {
+           throw new DomainException(MensajeError.PAGINA_NEGATIVA);
+       }
+       if (tamanio < 1) {
+           throw new DomainException(MensajeError.TAMANIO_PAGINA_INVALIDO);
+       }
+       return restaurantePersistencePort.listarRestaurantes(pagina, tamanio);
+   }
+
+       @Override
+    public Restaurante obtenerRestaurante(Long id) {
+        return restaurantePersistencePort.obtenerRestaurantePorId(id)
+                .orElseThrow(() -> new RestauranteNoEncontradoException(id));
     }
 }
+ 

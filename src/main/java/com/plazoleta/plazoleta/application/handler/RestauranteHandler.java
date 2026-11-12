@@ -9,4 +9,6 @@ public interface RestauranteHandler {
     Restaurante crearRestaurante(Restaurante restaurante);
 
     PaginaRespuesta<Restaurante> listarRestaurantes(int pagina, int tamanio);
+
+    Restaurante obtenerRestaurante(Long id);
 }
