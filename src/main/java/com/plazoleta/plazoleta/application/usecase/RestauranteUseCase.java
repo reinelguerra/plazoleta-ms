@@ -9,10 +9,8 @@ import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
-import com.plazoleta.plazoleta.domain.validator.RestauranteValidator;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
-
 
 public class RestauranteUseCase implements RestauranteServicePort {
 
@@ -27,7 +25,9 @@ public class RestauranteUseCase implements RestauranteServicePort {
 
     @Override
     public Restaurante crearRestaurante(Restaurante restaurante) {
-        RestauranteValidator.validar(restaurante);
+        if (restaurante == null) {
+            throw new DomainException(MensajeError.RESTAURANTE_OBLIGATORIO);
+        }
 
         Long idPropietario = restaurante.getIdPropietario();
         RolUsuario rol = usuarioClientPort.obtenerRolPorId(idPropietario)
@@ -57,3 +57,4 @@ public class RestauranteUseCase implements RestauranteServicePort {
                 .orElseThrow(() -> new RestauranteNoEncontradoException(id));
     }
 }
+ 

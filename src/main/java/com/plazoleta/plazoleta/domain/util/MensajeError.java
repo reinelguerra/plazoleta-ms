@@ -3,6 +3,19 @@ package com.plazoleta.plazoleta.domain.util;
 /** Mensajes de error centralizados. Aquí se irán agregando los de cada HU. */
 public final class MensajeError {
 
+    // Restaurantes (HU 2)
+    public static final String NOMBRE_RESTAURANTE_OBLIGATORIO = "El nombre del restaurante es obligatorio";
+    public static final String NOMBRE_RESTAURANTE_SOLO_NUMEROS =
+            "El nombre del restaurante no puede contener solo números";
+    public static final String NIT_OBLIGATORIO = "El NIT es obligatorio";
+    public static final String NIT_NO_NUMERICO = "El NIT debe ser numérico";
+    public static final String DIRECCION_RESTAURANTE_OBLIGATORIA = "La dirección es obligatoria";
+    public static final String TELEFONO_RESTAURANTE_OBLIGATORIO = "El teléfono es obligatorio";
+    public static final String TELEFONO_RESTAURANTE_INVALIDO =
+            "El teléfono debe tener máximo 13 caracteres, solo números y opcionalmente el símbolo +";
+    public static final String URL_LOGO_OBLIGATORIA = "La URL del logo es obligatoria";
+    public static final String PROPIETARIO_RESTAURANTE_OBLIGATORIO = "El id del propietario es obligatorio";
+
     // Paginación (HU 9, 10, 12)
     public static final String PAGINA_NEGATIVA = "La página no puede ser negativa";
     public static final String TAMANIO_PAGINA_INVALIDO = "El tamaño de página debe ser al menos 1";
