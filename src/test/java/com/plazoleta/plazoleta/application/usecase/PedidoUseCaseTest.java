@@ -11,6 +11,7 @@ import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.PedidoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
+import com.plazoleta.plazoleta.domain.spi.TrazabilidadClientPort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,11 +48,14 @@ class PedidoUseCaseTest {
     @Mock
     private RestaurantePersistencePort restaurantePersistencePort;
 
+    @Mock
+    private TrazabilidadClientPort trazabilidadClientPort;
+
     private PedidoUseCase pedidoUseCase;
 
     @BeforeEach
     void preparar() {
-        pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort, restaurantePersistencePort);
+        pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort, restaurantePersistencePort, trazabilidadClientPort);
     }
 
     private Pedido pedido(PedidoPlato... platos) {

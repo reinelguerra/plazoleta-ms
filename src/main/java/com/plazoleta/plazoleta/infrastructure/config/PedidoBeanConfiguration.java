@@ -7,6 +7,7 @@ import com.plazoleta.plazoleta.domain.api.PedidoServicePort;
 import com.plazoleta.plazoleta.domain.spi.PedidoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
+import com.plazoleta.plazoleta.domain.spi.TrazabilidadClientPort;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.adapter.PedidoJpaAdapter;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.mapper.PedidoEntityMapper;
 import com.plazoleta.plazoleta.infrastructure.output.jpa.repository.PedidoRepository;
@@ -25,8 +26,10 @@ public class PedidoBeanConfiguration {
     @Bean
     public PedidoServicePort pedidoServicePort(PedidoPersistencePort pedidoPersistencePort,
                                                PlatoPersistencePort platoPersistencePort,
-                                               RestaurantePersistencePort restaurantePersistencePort) {
-        return new PedidoUseCase(pedidoPersistencePort, platoPersistencePort, restaurantePersistencePort);
+                                               RestaurantePersistencePort restaurantePersistencePort,
+                                               TrazabilidadClientPort trazabilidadClientPort) {
+        return new PedidoUseCase(pedidoPersistencePort, platoPersistencePort,
+                restaurantePersistencePort, trazabilidadClientPort);
     }
 
     @Bean

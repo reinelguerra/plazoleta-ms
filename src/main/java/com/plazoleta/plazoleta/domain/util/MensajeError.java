@@ -34,6 +34,9 @@ public final class MensajeError {
     public static final String CLIENTE_CON_PEDIDO_EN_PROCESO =
             "Ya tienes un pedido en proceso: no puedes solicitar otro hasta que termine";
 
+    public static final String TRAZABILIDAD_NO_DISPONIBLE =
+            "No fue posible registrar el cambio de estado en el servicio de trazabilidad";
+
     private MensajeError() {
     }
 }

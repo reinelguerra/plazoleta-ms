@@ -8,9 +8,11 @@ import com.plazoleta.plazoleta.domain.model.EstadoPedido;
 import com.plazoleta.plazoleta.domain.model.Pedido;
 import com.plazoleta.plazoleta.domain.model.PedidoPlato;
 import com.plazoleta.plazoleta.domain.model.Plato;
+import com.plazoleta.plazoleta.domain.model.RegistroTrazabilidad;
 import com.plazoleta.plazoleta.domain.spi.PedidoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
+import com.plazoleta.plazoleta.domain.spi.TrazabilidadClientPort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 
 import java.time.LocalDateTime;
@@ -23,13 +25,16 @@ public class PedidoUseCase implements PedidoServicePort {
     private final PedidoPersistencePort pedidoPersistencePort;
     private final PlatoPersistencePort platoPersistencePort;
     private final RestaurantePersistencePort restaurantePersistencePort;
+    private final TrazabilidadClientPort trazabilidadClientPort;
 
     public PedidoUseCase(PedidoPersistencePort pedidoPersistencePort,
                          PlatoPersistencePort platoPersistencePort,
-                         RestaurantePersistencePort restaurantePersistencePort) {
+                         RestaurantePersistencePort restaurantePersistencePort,
+                         TrazabilidadClientPort trazabilidadClientPort) {
         this.pedidoPersistencePort = pedidoPersistencePort;
         this.platoPersistencePort = platoPersistencePort;
         this.restaurantePersistencePort = restaurantePersistencePort;
+        this.trazabilidadClientPort = trazabilidadClientPort;
     }
 
     @Override
@@ -49,7 +54,13 @@ public class PedidoUseCase implements PedidoServicePort {
         pedido.setIdEmpleado(null);
         pedido.setPin(null);
         pedido.setFecha(LocalDateTime.now());
-        return pedidoPersistencePort.guardarPedido(pedido);
+        Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
+
+        trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(
+                guardado.getId(), guardado.getIdCliente(), guardado.getIdRestaurante(),
+                guardado.getIdEmpleado(), null, guardado.getEstado()));
+
+        return guardado;
     }
 
     private void validarDatos(Pedido pedido) {
