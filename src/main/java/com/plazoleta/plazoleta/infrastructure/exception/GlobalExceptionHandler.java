@@ -61,6 +61,11 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.BAD_REQUEST, "Falta la cabecera obligatoria '" + e.getHeaderName() + "'");
     }
 
+        @ExceptionHandler(ServicioTrazabilidadNoDisponibleException.class)
+    public ResponseEntity<ErrorResponse> trazabilidadNoDisponible(ServicioTrazabilidadNoDisponibleException e) {
+        return construir(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }
