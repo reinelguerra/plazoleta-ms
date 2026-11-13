@@ -1,6 +1,7 @@
 package com.plazoleta.plazoleta.application.usecase;
 
 import com.plazoleta.plazoleta.domain.api.PedidoServicePort;
+import com.plazoleta.plazoleta.domain.exception.ClienteNoAutorizadoException;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PedidoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
@@ -114,6 +115,28 @@ public class PedidoUseCase implements PedidoServicePort {
         EstadoPedido estadoAnterior = pedido.getEstado();
         pedido.setIdEmpleado(idEmpleado);
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
+        Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
+
+        trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(
+                guardado.getId(), guardado.getIdCliente(), guardado.getIdRestaurante(),
+                guardado.getIdEmpleado(), estadoAnterior, guardado.getEstado()));
+
+        return guardado;
+    }
+
+    @Override
+    public Pedido cancelarPedido(Long idPedido, Long idCliente) {
+        Pedido pedido = pedidoPersistencePort.obtenerPedidoPorId(idPedido)
+                .orElseThrow(() -> new PedidoNoEncontradoException(idPedido));
+        if (idCliente == null || !idCliente.equals(pedido.getIdCliente())) {
+            throw new ClienteNoAutorizadoException();
+        }
+        if (pedido.getEstado() != EstadoPedido.PENDIENTE) {
+            throw new DomainException(MensajeError.PEDIDO_NO_CANCELABLE);
+        }
+
+        EstadoPedido estadoAnterior = pedido.getEstado();
+        pedido.setEstado(EstadoPedido.CANCELADO);
         Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
 
         trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(

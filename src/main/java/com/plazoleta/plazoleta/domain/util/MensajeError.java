@@ -59,6 +59,11 @@ public final class MensajeError {
     public static final String RESTAURANTE_PLATO_OBLIGATORIO = "El restaurante del plato es obligatorio";
     public static final String ESTADO_PLATO_OBLIGATORIO = "El estado del plato es obligatorio";
 
+    // Cancelar pedido (HU 16)
+    public static final String PEDIDO_NO_CANCELABLE =
+            "Lo sentimos, tu pedido ya est\u00e1 en preparaci\u00f3n y no puede cancelarse";
+    public static final String PEDIDO_DE_OTRO_CLIENTE = "El pedido no pertenece al cliente";
+
     private MensajeError() {
     }
 }
