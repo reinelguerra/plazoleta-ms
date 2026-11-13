@@ -73,6 +73,12 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
+    @ExceptionHandler(com.plazoleta.plazoleta.domain.exception.ClienteNoAutorizadoException.class)
+    public ResponseEntity<ErrorResponse> clienteNoAutorizado(
+            com.plazoleta.plazoleta.domain.exception.ClienteNoAutorizadoException e) {
+        return construir(HttpStatus.FORBIDDEN, e.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }

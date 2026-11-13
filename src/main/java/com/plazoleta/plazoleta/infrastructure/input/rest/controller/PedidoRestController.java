@@ -69,6 +69,28 @@ public class PedidoRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(pedidoRestMapper.toResponse(creado));
     }
 
+    @Operation(summary = "Cancelar un pedido",
+            description = "Solo el CLIENTE due\u00f1o del pedido y solo mientras est\u00e9 PENDIENTE. "
+                    + "Pasa a CANCELADO y se registra el cambio en trazabilidad.")
+    @ApiResponse(responseCode = "400", description = "El pedido ya no est\u00e1 PENDIENTE y no puede cancelarse",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403",
+            description = "Sin permiso: el rol del token no es CLIENTE o el pedido es de otro cliente",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "No existe el pedido",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503", description = "El servicio de trazabilidad no est\u00e1 disponible",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @PatchMapping("/{idPedido}/cancelacion")
+    public ResponseEntity<PedidoResponseDto> cancelarPedido(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @Parameter(description = "Id del pedido", example = "1")
+            @PathVariable("idPedido") Long idPedido) {
+        Long idCliente = usuario == null ? null : usuario.id();
+        Pedido pedido = pedidoHandler.cancelarPedido(idPedido, idCliente);
+        return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
+    }
+
     @Operation(summary = "Tomar un pedido y pasarlo a EN_PREPARACION",
             description = "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar PENDIENTE. "
                     + "Queda asignado al empleado del token y se registra el cambio en trazabilidad.")

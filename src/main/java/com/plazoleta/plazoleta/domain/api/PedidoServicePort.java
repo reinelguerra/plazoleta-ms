@@ -14,4 +14,7 @@ public interface PedidoServicePort {
 
     /** El empleado toma un pedido PENDIENTE de su restaurante y lo pasa a EN_PREPARACION. */
     Pedido iniciarPreparacion(Long idPedido, Long idEmpleado);
+
+    /** El cliente cancela su pedido mientras este PENDIENTE. */
+    Pedido cancelarPedido(Long idPedido, Long idCliente);
 }
