@@ -1,1 +1,1160 @@
-{"openapi":"3.1.0","info":{"title":"plazoleta-ms","description":"Restaurantes y platos de la plazoleta de comidas. Todos los endpoints exigen un token JWT, que se obtiene en usuarios-ms con POST /api/v1/auth/login.","version":"1.0.0"},"servers":[{"url":"http://localhost:8082","description":"Servidor local"}],"security":[{"bearerAuth":[]}],"tags":[{"name":"Restaurantes","description":"Creación y consulta de restaurantes"},{"name":"Platos","description":"Creación y administración de los platos del menú"}],"paths":{"/api/v1/restaurantes":{"get":{"tags":["Restaurantes"],"summary":"Listar restaurantes","description":"Solo el CLIENTE. Devuelve únicamente el nombre y el logo, ordenados alfabéticamente por nombre (sin distinguir mayúsculas) y paginados.","operationId":"listarRestaurantes","parameters":[{"name":"pagina","in":"query","description":"Número de página, empezando en 0","required":false,"schema":{"type":"integer","format":"int32","default":0},"example":0},{"name":"tamanio","in":"query","description":"Cantidad de restaurantes por página (mínimo 1)","required":false,"schema":{"type":"integer","format":"int32","default":10},"example":10}],"responses":{"400":{"description":"Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"No autenticado: falta el token o no es válido","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"403":{"description":"Sin permiso: el rol del token no puede hacer esta acción","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}},"post":{"tags":["Restaurantes"],"summary":"Crear un restaurante","description":"Solo el ADMINISTRADOR. Reglas: el nombre no puede ser solo números, el NIT es numérico, el teléfono tiene máximo 13 caracteres (puede empezar con +) y el propietario debe existir en usuarios-ms con rol PROPIETARIO.","operationId":"crearRestaurante","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/RestauranteRequest"}}},"required":true},"responses":{"400":{"description":"Datos inválidos o regla de negocio incumplida","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"El propietario indicado no existe en usuarios-ms","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"El servicio de usuarios no está disponible","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"No autenticado: falta el token o no es válido","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"403":{"description":"Sin permiso: el rol del token no puede hacer esta acción","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"201":{"description":"Created","content":{"*/*":{"schema":{"$ref":"#/components/schemas/RestauranteResponse"}}}}}}},"/api/v1/platos":{"post":{"tags":["Platos"],"summary":"Crear un plato","description":"Solo el PROPIETARIO del restaurante al que se asigna el plato. El plato nace activo. Reglas: nombre, descripción, URL de imagen y categoría son obligatorios y el precio es un número entero mayor a 0.","operationId":"crearPlato","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PlatoRequestDto"}}},"required":true},"responses":{"400":{"description":"Datos inválidos o regla de negocio incumplida","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"403":{"description":"Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"No autenticado: falta el token o no es válido","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"201":{"description":"Created","content":{"*/*":{"schema":{"$ref":"#/components/schemas/PlatoResponseDto"}}}}}}},"/api/v1/platos/{id}":{"patch":{"tags":["Platos"],"summary":"Modificar un plato","description":"Solo el PROPIETARIO del restaurante del plato. Únicamente se pueden cambiar el precio (entero mayor a 0) y la descripción; el resto del plato no se toca.","operationId":"modificarPlato","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer","format":"int64"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PlatoModificacionRequestDto"}}},"required":true},"responses":{"400":{"description":"Datos inválidos o regla de negocio incumplida","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"403":{"description":"Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"No existe un plato con ese id","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"No autenticado: falta el token o no es válido","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}},"/api/v1/platos/{id}/estado":{"patch":{"tags":["Platos"],"summary":"Habilitar o deshabilitar un plato","description":"Solo el PROPIETARIO del restaurante del plato. activo = true lo habilita y activo = false lo deshabilita. No se pueden tocar platos de otros restaurantes.","operationId":"cambiarEstadoPlato","parameters":[{"name":"id","in":"path","required":true,"schema":{"type":"integer","format":"int64"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PlatoEstadoRequestDto"}}},"required":true},"responses":{"400":{"description":"Datos inválidos o regla de negocio incumplida","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"403":{"description":"Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"No existe un plato con ese id","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"No autenticado: falta el token o no es válido","content":{"*/*":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}},"components":{"schemas":{"RestauranteRequest":{"type":"object","description":"Datos para crear un restaurante","properties":{"nombre":{"type":"string","description":"Nombre del restaurante. Puede incluir números, pero no estar formado solo por números","example":"Sabor 24"},"nit":{"type":"string","description":"NIT: solo dígitos","example":"900123456","pattern":"^\\d+$"},"direccion":{"type":"string","description":"Dirección del restaurante","example":"Calle 10 # 5-20"},"telefono":{"type":"string","description":"Teléfono: máximo 13 caracteres, solo dígitos y opcionalmente un + al inicio","example":"+573001234567","maxLength":13,"pattern":"^\\+?\\d{1,12}$"},"urlLogo":{"type":"string","description":"URL del logo","example":"https://logo.com/sabor.png"},"idPropietario":{"type":"integer","format":"int64","description":"Id del propietario: debe existir en usuarios-ms con rol PROPIETARIO","example":2}},"required":["direccion","idPropietario","nit","nombre","telefono","urlLogo"]},"ErrorResponse":{"type":"object","description":"Formato de error de la API","properties":{"mensaje":{"type":"string","description":"Explicación del error","example":"No existe un plato con id 99"},"status":{"type":"integer","format":"int32","description":"Código HTTP del error","example":404}}},"RestauranteResponse":{"type":"object","description":"Restaurante creado","properties":{"id":{"type":"integer","format":"int64","description":"Identificador generado","example":1},"nombre":{"type":"string","description":"Nombre del restaurante","example":"Sabor 24"},"nit":{"type":"string","description":"NIT","example":"900123456"},"direccion":{"type":"string","description":"Dirección","example":"Calle 10 # 5-20"},"telefono":{"type":"string","description":"Teléfono","example":"+573001234567"},"urlLogo":{"type":"string","description":"URL del logo","example":"https://logo.com/sabor.png"},"idPropietario":{"type":"integer","format":"int64","description":"Id del propietario","example":2}}},"PlatoRequestDto":{"type":"object","description":"Datos para crear un plato","properties":{"nombre":{"type":"string","description":"Nombre del plato","example":"Bandeja paisa"},"precio":{"type":"string","description":"Precio: número entero mayor a 0","example":25000,"minimum":1},"descripcion":{"type":"string","description":"Descripción del plato","example":"Frijoles, arroz, carne molida y chicharrón"},"urlImagen":{"type":"string","description":"URL de la imagen del plato","example":"https://imagenes.com/bandeja.png"},"categoria":{"type":"string","description":"Categoría del plato","example":"Plato fuerte"},"idRestaurante":{"type":"integer","format":"int64","description":"Id del restaurante al que pertenece: debe ser del propietario autenticado","example":1}},"required":["categoria","descripcion","idRestaurante","nombre","precio","urlImagen"]},"PlatoResponseDto":{"type":"object","description":"Plato","properties":{"id":{"type":"integer","format":"int64","description":"Identificador del plato","example":1},"nombre":{"type":"string","description":"Nombre del plato","example":"Bandeja paisa"},"precio":{"type":"integer","format":"int32","description":"Precio (entero)","example":25000},"descripcion":{"type":"string","description":"Descripción","example":"Frijoles, arroz, carne molida y chicharrón"},"urlImagen":{"type":"string","description":"URL de la imagen","example":"https://imagenes.com/bandeja.png"},"categoria":{"type":"string","description":"Categoría","example":"Plato fuerte"},"activo":{"type":"boolean","description":"Si el plato está habilitado. Los platos nuevos nacen activos","example":true},"idRestaurante":{"type":"integer","format":"int64","description":"Id del restaurante","example":1}}},"PlatoModificacionRequestDto":{"type":"object","description":"Datos que se pueden modificar de un plato: solo precio y descripción","properties":{"precio":{"type":"string","description":"Nuevo precio: número entero mayor a 0","example":30000,"minimum":1},"descripcion":{"type":"string","description":"Nueva descripción del plato","example":"Frijoles, arroz, carne, chicharrón y huevo"}},"required":["descripcion","precio"]},"PlatoEstadoRequestDto":{"type":"object","description":"Nuevo estado del plato","properties":{"activo":{"type":"boolean","description":"true habilita el plato y false lo deshabilita","example":false}},"required":["activo"]}},"securitySchemes":{"bearerAuth":{"type":"http","description":"Pega el token del login, sin la palabra Bearer","scheme":"bearer","bearerFormat":"JWT"}}}}
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Plazoleta - API de restaurantes, platos y pedidos",
+    "description" : "Microservicio de la plazoleta de comidas. Todos los endpoints exigen un token JWT emitido por usuarios-ms (botón Authorize). El rol del token decide qué endpoints se pueden usar: ADMINISTRADOR, PROPIETARIO, EMPLEADO o CLIENTE.",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:8082",
+    "description" : "Generated server url"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "tags" : [ {
+    "name" : "Restaurantes",
+    "description" : "Creación y consulta de restaurantes"
+  }, {
+    "name" : "Platos",
+    "description" : "Creación, administración y consulta de los platos del menú"
+  }, {
+    "name" : "Pedidos",
+    "description" : "Realización y seguimiento de los pedidos"
+  } ],
+  "paths" : {
+    "/api/v1/restaurantes" : {
+      "get" : {
+        "tags" : [ "Restaurantes" ],
+        "summary" : "Listar restaurantes",
+        "description" : "Solo el CLIENTE. Devuelve únicamente el nombre y el logo, ordenados alfabéticamente por nombre (sin distinguir mayúsculas) y paginados.",
+        "operationId" : "listarRestaurantes",
+        "parameters" : [ {
+          "name" : "pagina",
+          "in" : "query",
+          "description" : "Número de página, empezando en 0",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          },
+          "example" : 0
+        }, {
+          "name" : "tamanio",
+          "in" : "query",
+          "description" : "Cantidad de restaurantes por página (mínimo 1)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          },
+          "example" : 10
+        } ],
+        "responses" : {
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no puede hacer esta acción",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Restaurantes" ],
+        "summary" : "Crear un restaurante",
+        "description" : "Solo el ADMINISTRADOR. Reglas: el nombre no puede ser solo números, el NIT es numérico, el teléfono tiene máximo 13 caracteres (puede empezar con +) y el propietario debe existir en usuarios-ms con rol PROPIETARIO.",
+        "operationId" : "crearRestaurante",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RestauranteRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Datos inválidos o regla de negocio incumplida",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "El propietario indicado no existe en usuarios-ms",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "El servicio de usuarios no está disponible",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no puede hacer esta acción",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RestauranteResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platos" : {
+      "post" : {
+        "tags" : [ "Platos" ],
+        "summary" : "Crear un plato",
+        "description" : "Solo el PROPIETARIO del restaurante al que se asigna el plato. El plato nace activo. Reglas: nombre, descripción, URL de imagen y categoría son obligatorios y el precio es un número entero mayor a 0.",
+        "operationId" : "crearPlato",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlatoRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Datos inválidos o regla de negocio incumplida",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PlatoResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedidos" : {
+      "get" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Listar los pedidos por estado",
+        "description" : "Solo el EMPLEADO. Devuelve únicamente los pedidos del restaurante al que pertenece el empleado (se consulta en usuarios-ms), del más antiguo al más reciente y paginados. No incluye el pin de entrega.",
+        "operationId" : "listarPedidosPorEstado",
+        "parameters" : [ {
+          "name" : "estado",
+          "in" : "query",
+          "description" : "Estado por el que se filtra: PENDIENTE, EN_PREPARACION, LISTO, ENTREGADO o CANCELADO",
+          "required" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "PENDIENTE", "EN_PREPARACION", "LISTO", "ENTREGADO", "CANCELADO" ]
+          },
+          "example" : "PENDIENTE"
+        }, {
+          "name" : "pagina",
+          "in" : "query",
+          "description" : "Número de página, empezando en 0",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          },
+          "example" : 0
+        }, {
+          "name" : "tamanio",
+          "in" : "query",
+          "description" : "Cantidad de pedidos por página (mínimo 1)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          },
+          "example" : 10
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "Falta el estado, el estado no existe, la paginación es inválida o el empleado no tiene restaurante asignado",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es EMPLEADO",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "El empleado no existe en usuarios-ms",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "El servicio de usuarios no está disponible",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Realizar un pedido",
+        "description" : "Solo el CLIENTE. El pedido es de un solo restaurante, con platos activos de ese restaurante y cantidades mayores a 0. Nace en estado PENDIENTE. Un cliente no puede hacer un nuevo pedido si tiene otro en proceso (PENDIENTE, EN_PREPARACION o LISTO).",
+        "operationId" : "realizarPedido",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PedidoRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Datos inválidos o regla de negocio incumplida",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es CLIENTE",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe el restaurante o alguno de los platos",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PedidoResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platos/{id}" : {
+      "patch" : {
+        "tags" : [ "Platos" ],
+        "summary" : "Modificar un plato",
+        "description" : "Solo el PROPIETARIO del restaurante del plato. Únicamente se pueden cambiar el precio (entero mayor a 0) y la descripción; el resto del plato no se toca.",
+        "operationId" : "modificarPlato",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlatoModificacionRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Datos inválidos o regla de negocio incumplida",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe un plato con ese id",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platos/{id}/estado" : {
+      "patch" : {
+        "tags" : [ "Platos" ],
+        "summary" : "Habilitar o deshabilitar un plato",
+        "description" : "Solo el PROPIETARIO del restaurante del plato. activo = true lo habilita y activo = false lo deshabilita. No se pueden tocar platos de otros restaurantes.",
+        "operationId" : "cambiarEstadoPlato",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PlatoEstadoRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "Datos inválidos o regla de negocio incumplida",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol no es PROPIETARIO o el restaurante del plato no es tuyo",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe un plato con ese id",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedidos/{idPedido}/preparacion" : {
+      "patch" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Tomar un pedido y pasarlo a EN_PREPARACION",
+        "description" : "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar PENDIENTE. Queda asignado al empleado del token y se registra el cambio en trazabilidad.",
+        "operationId" : "iniciarPreparacion",
+        "parameters" : [ {
+          "name" : "idPedido",
+          "in" : "path",
+          "description" : "Id del pedido",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "El pedido no es del restaurante del empleado, no está PENDIENTE o el empleado no tiene restaurante asignado",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es EMPLEADO",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe el pedido o el empleado",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Un servicio externo no está disponible",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedidos/{idPedido}/cancelacion" : {
+      "patch" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Cancelar un pedido",
+        "description" : "Solo el CLIENTE dueño del pedido y solo mientras esté PENDIENTE. Pasa a CANCELADO y se registra el cambio en trazabilidad.",
+        "operationId" : "cancelarPedido",
+        "parameters" : [ {
+          "name" : "idPedido",
+          "in" : "path",
+          "description" : "Id del pedido",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "El pedido ya no está PENDIENTE y no puede cancelarse",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es CLIENTE o el pedido es de otro cliente",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe el pedido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "El servicio de trazabilidad no está disponible",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/restaurantes/{id}" : {
+      "get" : {
+        "tags" : [ "Restaurantes" ],
+        "summary" : "Obtener un restaurante por id",
+        "description" : "Solo PROPIETARIO o ADMINISTRADOR. Lo usa Trazabilidad para comprobar que el restaurante pertenece al propietario que consulta (campo idPropietario).",
+        "operationId" : "obtenerRestaurante",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        } ],
+        "responses" : {
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no puede hacer esta acción",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe un restaurante con ese id",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platos/restaurante/{idRestaurante}" : {
+      "get" : {
+        "tags" : [ "Platos" ],
+        "summary" : "Listar los platos de un restaurante",
+        "description" : "Solo el CLIENTE. Devuelve únicamente los platos activos del restaurante, ordenados alfabéticamente por nombre y paginados. Se puede filtrar por categoría.",
+        "operationId" : "listarPlatos",
+        "parameters" : [ {
+          "name" : "idRestaurante",
+          "in" : "path",
+          "description" : "Id del restaurante",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        }, {
+          "name" : "categoria",
+          "in" : "query",
+          "description" : "Categoría para filtrar (opcional)",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          },
+          "example" : "Postre"
+        }, {
+          "name" : "pagina",
+          "in" : "query",
+          "description" : "Número de página, empezando en 0",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          },
+          "example" : 0
+        }, {
+          "name" : "tamanio",
+          "in" : "query",
+          "description" : "Cantidad de platos por página (mínimo 1)",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 10
+          },
+          "example" : 10
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "Paginación inválida: la página no puede ser negativa y el tamaño debe ser al menos 1",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es CLIENTE",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe un restaurante con ese id",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "RestauranteRequest" : {
+        "type" : "object",
+        "description" : "Datos para crear un restaurante",
+        "properties" : {
+          "nombre" : {
+            "type" : "string",
+            "description" : "Nombre del restaurante. Puede incluir números, pero no estar formado solo por números",
+            "example" : "Sabor 24",
+            "minLength" : 1,
+            "pattern" : "^(?!\\s*\\d+\\s*$).+$"
+          },
+          "nit" : {
+            "type" : "string",
+            "description" : "NIT: solo dígitos",
+            "example" : "900123456",
+            "minLength" : 1,
+            "pattern" : "^\\d+$"
+          },
+          "direccion" : {
+            "type" : "string",
+            "description" : "Dirección del restaurante",
+            "example" : "Calle 10 # 5-20",
+            "minLength" : 1
+          },
+          "telefono" : {
+            "type" : "string",
+            "description" : "Teléfono: máximo 13 caracteres, solo dígitos y opcionalmente un + al inicio",
+            "example" : "+573001234567",
+            "maxLength" : 13,
+            "minLength" : 1,
+            "pattern" : "^\\+?\\d{1,12}$"
+          },
+          "urlLogo" : {
+            "type" : "string",
+            "description" : "URL del logo",
+            "example" : "https://logo.com/sabor.png",
+            "minLength" : 1
+          },
+          "idPropietario" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del propietario: debe existir en usuarios-ms con rol PROPIETARIO",
+            "example" : 2
+          }
+        },
+        "required" : [ "direccion", "idPropietario", "nit", "nombre", "telefono", "urlLogo" ]
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "description" : "Formato de error de la API",
+        "properties" : {
+          "mensaje" : {
+            "type" : "string",
+            "description" : "Explicación del error",
+            "example" : "No existe un plato con id 99"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Código HTTP del error",
+            "example" : 404
+          }
+        }
+      },
+      "RestauranteResponse" : {
+        "type" : "object",
+        "description" : "Restaurante creado",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Identificador generado",
+            "example" : 1
+          },
+          "nombre" : {
+            "type" : "string",
+            "description" : "Nombre del restaurante",
+            "example" : "Sabor 24"
+          },
+          "nit" : {
+            "type" : "string",
+            "description" : "NIT",
+            "example" : "900123456"
+          },
+          "direccion" : {
+            "type" : "string",
+            "description" : "Dirección",
+            "example" : "Calle 10 # 5-20"
+          },
+          "telefono" : {
+            "type" : "string",
+            "description" : "Teléfono",
+            "example" : "+573001234567"
+          },
+          "urlLogo" : {
+            "type" : "string",
+            "description" : "URL del logo",
+            "example" : "https://logo.com/sabor.png"
+          },
+          "idPropietario" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del propietario",
+            "example" : 2
+          }
+        }
+      },
+      "PlatoRequestDto" : {
+        "type" : "object",
+        "description" : "Datos para crear un plato",
+        "properties" : {
+          "nombre" : {
+            "type" : "string",
+            "description" : "Nombre del plato",
+            "example" : "Bandeja paisa",
+            "minLength" : 1
+          },
+          "precio" : {
+            "type" : "string",
+            "description" : "Precio en pesos: número entero mayor a 0",
+            "example" : 25000,
+            "minimum" : 1
+          },
+          "descripcion" : {
+            "type" : "string",
+            "description" : "Descripción del plato",
+            "example" : "Frijoles, arroz, carne molida y chicharrón",
+            "minLength" : 1
+          },
+          "urlImagen" : {
+            "type" : "string",
+            "description" : "URL de la imagen del plato",
+            "example" : "https://imagenes.com/bandeja.png",
+            "minLength" : 1
+          },
+          "categoria" : {
+            "type" : "string",
+            "description" : "Categoría del plato",
+            "example" : "Plato fuerte",
+            "minLength" : 1
+          },
+          "idRestaurante" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del restaurante al que pertenece: debe ser del propietario autenticado",
+            "example" : 1
+          }
+        },
+        "required" : [ "categoria", "descripcion", "idRestaurante", "nombre", "precio", "urlImagen" ]
+      },
+      "PlatoResponseDto" : {
+        "type" : "object",
+        "description" : "Plato",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Identificador del plato",
+            "example" : 1
+          },
+          "nombre" : {
+            "type" : "string",
+            "description" : "Nombre del plato",
+            "example" : "Bandeja paisa"
+          },
+          "precio" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Precio (entero)",
+            "example" : 25000
+          },
+          "descripcion" : {
+            "type" : "string",
+            "description" : "Descripción",
+            "example" : "Frijoles, arroz, carne molida y chicharrón"
+          },
+          "urlImagen" : {
+            "type" : "string",
+            "description" : "URL de la imagen",
+            "example" : "https://imagenes.com/bandeja.png"
+          },
+          "categoria" : {
+            "type" : "string",
+            "description" : "Categoría",
+            "example" : "Plato fuerte"
+          },
+          "activo" : {
+            "type" : "boolean",
+            "description" : "Si el plato está habilitado. Los platos nuevos nacen activos",
+            "example" : true
+          },
+          "idRestaurante" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del restaurante",
+            "example" : 1
+          }
+        }
+      },
+      "PedidoPlatoRequestDto" : {
+        "type" : "object",
+        "description" : "Un plato del pedido con su cantidad",
+        "properties" : {
+          "idPlato" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del plato",
+            "example" : 1
+          },
+          "cantidad" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Cantidad: entero mayor a 0",
+            "example" : 2,
+            "minimum" : 1
+          }
+        },
+        "required" : [ "cantidad", "idPlato" ]
+      },
+      "PedidoRequestDto" : {
+        "type" : "object",
+        "description" : "Datos para realizar un pedido. El cliente sale del token",
+        "properties" : {
+          "idRestaurante" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del restaurante: todos los platos deben ser de este restaurante",
+            "example" : 1
+          },
+          "platos" : {
+            "type" : "array",
+            "description" : "Platos pedidos con su cantidad",
+            "items" : {
+              "$ref" : "#/components/schemas/PedidoPlatoRequestDto"
+            },
+            "minItems" : 1
+          }
+        },
+        "required" : [ "idRestaurante", "platos" ]
+      },
+      "PedidoPlatoResponseDto" : {
+        "type" : "object",
+        "description" : "Plato de un pedido",
+        "properties" : {
+          "idPlato" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del plato",
+            "example" : 1
+          },
+          "cantidad" : {
+            "type" : "integer",
+            "format" : "int32",
+            "description" : "Cantidad pedida",
+            "example" : 2
+          }
+        }
+      },
+      "PedidoResponseDto" : {
+        "type" : "object",
+        "description" : "Pedido. Lo devuelven la creación, el listado por estado, la toma de un pedido por un empleado y la cancelación. Nunca incluye el pin de entrega",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Identificador del pedido",
+            "example" : 1
+          },
+          "idCliente" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del cliente dueño del pedido",
+            "example" : 5
+          },
+          "idRestaurante" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "Id del restaurante",
+            "example" : 1
+          },
+          "estado" : {
+            "type" : "string",
+            "description" : "Estado del pedido. Nace PENDIENTE; un empleado lo pasa a EN_PREPARACION y el cliente puede cancelarlo solo mientras esté PENDIENTE",
+            "enum" : [ "PENDIENTE", "EN_PREPARACION", "LISTO", "ENTREGADO", "CANCELADO" ],
+            "example" : "PENDIENTE"
+          },
+          "idEmpleado" : {
+            "type" : [ "integer", "null" ],
+            "format" : "int64",
+            "description" : "Id del empleado que tomó el pedido. Vacío mientras esté PENDIENTE o si se canceló antes de tomarse",
+            "example" : 12
+          },
+          "fecha" : {
+            "type" : "string",
+            "format" : "date-time",
+            "description" : "Fecha y hora de creación del pedido",
+            "example" : "2026-11-13T10:30:00"
+          },
+          "platos" : {
+            "type" : "array",
+            "description" : "Platos del pedido con su cantidad",
+            "items" : {
+              "$ref" : "#/components/schemas/PedidoPlatoResponseDto"
+            }
+          }
+        }
+      },
+      "PlatoModificacionRequestDto" : {
+        "type" : "object",
+        "description" : "Datos que se pueden modificar de un plato: solo precio y descripción",
+        "properties" : {
+          "precio" : {
+            "type" : "string",
+            "description" : "Nuevo precio en pesos: número entero mayor a 0",
+            "example" : 27000,
+            "minimum" : 1
+          },
+          "descripcion" : {
+            "type" : "string",
+            "description" : "Nueva descripción del plato",
+            "example" : "Ahora con huevo y aguacate",
+            "minLength" : 1
+          }
+        },
+        "required" : [ "descripcion", "precio" ]
+      },
+      "PlatoEstadoRequestDto" : {
+        "type" : "object",
+        "description" : "Nuevo estado de un plato",
+        "properties" : {
+          "activo" : {
+            "type" : "boolean",
+            "description" : "true habilita el plato y false lo deshabilita",
+            "example" : false
+          }
+        },
+        "required" : [ "activo" ]
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "description" : "Pega solo el token, sin la palabra Bearer",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}
