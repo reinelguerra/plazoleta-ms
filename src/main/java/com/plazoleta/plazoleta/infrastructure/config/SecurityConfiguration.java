@@ -60,6 +60,8 @@ public class SecurityConfiguration {
                                 .hasRole(RolUsuario.CLIENTE.name())
                         .requestMatchers(rutas.matcher(HttpMethod.GET, RUTA_PEDIDOS))
                                 .hasRole(RolUsuario.EMPLEADO.name())
+                        .requestMatchers(rutas.matcher(HttpMethod.PATCH, RUTA_PEDIDOS + "/**"))
+                                .hasRole(RolUsuario.EMPLEADO.name())        
                         .requestMatchers(rutas.matcher(HttpMethod.POST, RUTA_PLATOS))
                                 .hasRole(RolUsuario.PROPIETARIO.name())
                         .requestMatchers(rutas.matcher(HttpMethod.PATCH, RUTA_PLATOS + "/**"))

@@ -41,6 +41,12 @@ public final class MensajeError {
     public static final String EMPLEADO_SIN_RESTAURANTE =
             "El empleado no tiene un restaurante asignado";
 
+    public static final String PEDIDO_NO_ENCONTRADO = "No existe el pedido con id ";
+    public static final String PEDIDO_DE_OTRO_RESTAURANTE =
+            "El pedido no pertenece al restaurante del empleado";
+    public static final String PEDIDO_NO_PENDIENTE =
+            "Solo se puede tomar un pedido en estado PENDIENTE";
+
     private MensajeError() {
     }
 }

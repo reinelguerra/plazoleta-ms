@@ -10,4 +10,6 @@ public interface PedidoHandler {
     Pedido realizarPedido(Pedido pedido);
 
     PaginaRespuesta<Pedido> listarPedidosPorEstado(Long idEmpleado, EstadoPedido estado, int pagina, int tamanio);
+
+    Pedido iniciarPreparacion(Long idPedido, Long idEmpleado);
 }

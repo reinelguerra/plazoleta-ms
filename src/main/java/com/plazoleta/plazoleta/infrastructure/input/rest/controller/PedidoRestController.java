@@ -20,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,6 +67,29 @@ public class PedidoRestController {
 
         Pedido creado = pedidoHandler.realizarPedido(pedido);
         return ResponseEntity.status(HttpStatus.CREATED).body(pedidoRestMapper.toResponse(creado));
+    }
+
+    @Operation(summary = "Tomar un pedido y pasarlo a EN_PREPARACION",
+            description = "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar PENDIENTE. "
+                    + "Queda asignado al empleado del token y se registra el cambio en trazabilidad.")
+    @ApiResponse(responseCode = "400",
+            description = "El pedido no es del restaurante del empleado, no está PENDIENTE o el empleado "
+                    + "no tiene restaurante asignado",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Sin permiso: el rol del token no es EMPLEADO",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "No existe el pedido o el empleado",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503", description = "Un servicio externo no está disponible",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @PatchMapping("/{idPedido}/preparacion")
+    public ResponseEntity<PedidoResponseDto> iniciarPreparacion(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @Parameter(description = "Id del pedido", example = "1")
+            @PathVariable("idPedido") Long idPedido) {
+        Long idEmpleado = usuario == null ? null : usuario.id();
+        Pedido pedido = pedidoHandler.iniciarPreparacion(idPedido, idEmpleado);
+        return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
     }
 
     @Operation(summary = "Listar los pedidos por estado",
