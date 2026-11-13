@@ -1,6 +1,7 @@
-package com.plazoleta.plazoleta.infrastructure.input.rest;
+package com.plazoleta.plazoleta.infrastructure.input.rest.controller;
 
 import com.plazoleta.plazoleta.application.handler.PlatoHandler;
+import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
 import com.plazoleta.plazoleta.domain.model.Plato;
@@ -24,18 +25,15 @@ import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class PlatoRestControllerModificarTest {
+class PlatoRestControllerEstadoTest {
 
-    private static final String URL = "/api/v1/platos/5";
-    private static final String JSON_VALIDO = """
-            { "precio": 30000, "descripcion": "Nueva descripcion" }
-            """;
+    private static final String URL = "/api/v1/platos/5/estado";
+    private static final String JSON_DESHABILITAR = "{ \"activo\": false }";
 
     private PlatoHandler servicePort;
     private MockMvc mockMvc;
@@ -65,49 +63,47 @@ class PlatoRestControllerModificarTest {
     }
 
     @Test
-    void modificar_valido_usaElIdDelTokenYDevuelve200() throws Exception {
-        Plato modificado = new Plato(5L, "Bandeja", 30000, "Nueva descripcion",
-                "https://img.com/b.png", "Fuerte", true, 10L);
-        when(servicePort.modificarPlato(5L, 30000, "Nueva descripcion", 7L)).thenReturn(modificado);
+    void deshabilitar_usaElIdDelTokenYDevuelve200() throws Exception {
+        Plato actualizado = new Plato(5L, "Bandeja", 25000, "Plato típico",
+                "https://img.com/b.png", "Fuerte", false, 10L);
+        when(servicePort.cambiarEstadoPlato(5L, false, 7L)).thenReturn(actualizado);
 
-        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_DESHABILITAR))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.nombre").value("Bandeja"))
-                .andExpect(jsonPath("$.precio").value(30000))
-                .andExpect(jsonPath("$.descripcion").value("Nueva descripcion"));
+                .andExpect(jsonPath("$.activo").value(false));
 
-        verify(servicePort).modificarPlato(5L, 30000, "Nueva descripcion", 7L);
+        verify(servicePort).cambiarEstadoPlato(5L, false, 7L);
     }
 
     @Test
-    void modificar_precioConDecimales_devuelve400() throws Exception {
-        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"precio\": 100.5, \"descripcion\": \"x\" }"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
-
-        verifyNoInteractions(servicePort);
-    }
-
-    @Test
-    void modificar_platoInexistente_devuelve404() throws Exception {
-        when(servicePort.modificarPlato(5L, 30000, "Nueva descripcion", 7L))
+    void platoInexistente_devuelve404() throws Exception {
+        when(servicePort.cambiarEstadoPlato(5L, false, 7L))
                 .thenThrow(new PlatoNoEncontradoException(5L));
 
-        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_DESHABILITAR))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404));
     }
 
     @Test
-    void modificar_platoDeOtroPropietario_devuelve403() throws Exception {
+    void platoDeOtroPropietario_devuelve403() throws Exception {
         autenticarComo(8L);
-        when(servicePort.modificarPlato(5L, 30000, "Nueva descripcion", 8L))
+        when(servicePort.cambiarEstadoPlato(5L, false, 8L))
                 .thenThrow(new PropietarioNoAutorizadoException());
 
-        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_VALIDO))
+        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content(JSON_DESHABILITAR))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.status").value(403));
+    }
+
+    @Test
+    void estadoFaltante_devuelve400ConElFormatoAcordado() throws Exception {
+        when(servicePort.cambiarEstadoPlato(5L, null, 7L))
+                .thenThrow(new DomainException("El estado del plato es obligatorio"));
+
+        mockMvc.perform(patch(URL).contentType(MediaType.APPLICATION_JSON).content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
     }
 }
