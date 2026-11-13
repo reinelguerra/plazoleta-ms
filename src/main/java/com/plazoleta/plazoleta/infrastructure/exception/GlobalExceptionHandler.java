@@ -66,6 +66,13 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
+        @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> parametroFaltante(
+            org.springframework.web.bind.MissingServletRequestParameterException e) {
+        return construir(HttpStatus.BAD_REQUEST,
+                "Falta el parámetro obligatorio '" + e.getParameterName() + "'");
+    }
+
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }

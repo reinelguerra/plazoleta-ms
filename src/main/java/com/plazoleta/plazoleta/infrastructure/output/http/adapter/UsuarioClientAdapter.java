@@ -1,5 +1,6 @@
 package com.plazoleta.plazoleta.infrastructure.output.http.adapter;
 
+import com.plazoleta.plazoleta.domain.model.DatosUsuario;
 import com.plazoleta.plazoleta.domain.model.RolUsuario;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.infrastructure.exception.ServicioUsuariosNoDisponibleException;
@@ -23,6 +24,11 @@ public class UsuarioClientAdapter implements UsuarioClientPort {
 
     @Override
     public Optional<RolUsuario> obtenerRolPorId(Long idUsuario) {
+        return obtenerUsuarioPorId(idUsuario).map(DatosUsuario::rol);
+    }
+
+    @Override
+    public Optional<DatosUsuario> obtenerUsuarioPorId(Long idUsuario) {
         try {
             UsuarioResponse usuario = usuariosRestClient.get()
                     .uri("/usuarios/{id}", idUsuario)
@@ -32,7 +38,8 @@ public class UsuarioClientAdapter implements UsuarioClientPort {
             if (usuario == null || usuario.rol() == null) {
                 return Optional.empty();
             }
-            return Optional.of(RolUsuario.valueOf(usuario.rol()));
+            return Optional.of(new DatosUsuario(usuario.id(), RolUsuario.valueOf(usuario.rol()),
+                    usuario.celular(), usuario.idRestaurante()));
 
         } catch (HttpClientErrorException.NotFound e) {
             return Optional.empty();

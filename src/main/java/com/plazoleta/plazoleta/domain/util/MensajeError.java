@@ -37,6 +37,10 @@ public final class MensajeError {
     public static final String TRAZABILIDAD_NO_DISPONIBLE =
             "No fue posible registrar el cambio de estado en el servicio de trazabilidad";
 
+    public static final String ESTADO_PEDIDO_OBLIGATORIO = "El estado del pedido es obligatorio";
+    public static final String EMPLEADO_SIN_RESTAURANTE =
+            "El empleado no tiene un restaurante asignado";
+
     private MensajeError() {
     }
 }
