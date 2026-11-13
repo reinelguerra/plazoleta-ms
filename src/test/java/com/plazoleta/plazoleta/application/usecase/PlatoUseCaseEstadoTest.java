@@ -99,11 +99,4 @@ class PlatoUseCaseEstadoTest {
         verify(platoPersistencePort, never()).guardarPlato(any());
     }
 
-    @Test
-    void estadoNulo_lanzaExcepcionSinConsultarNada() {
-        assertThrows(DomainException.class,
-                () -> platoUseCase.cambiarEstadoPlato(5L, null, 7L));
-
-        verifyNoInteractions(platoPersistencePort, restaurantePersistencePort);
-    }
 }

@@ -88,27 +88,4 @@ class PlatoUseCaseModificarTest {
         verify(platoPersistencePort, never()).guardarPlato(any());
     }
 
-    @Test
-    void precioNulo_lanzaExcepcionSinConsultarNada() {
-        assertThrows(DomainException.class,
-                () -> platoUseCase.modificarPlato(5L, null, "Nueva descripcion", 7L));
-
-        verifyNoInteractions(platoPersistencePort, restaurantePersistencePort);
-    }
-
-    @Test
-    void precioCero_lanzaExcepcionSinConsultarNada() {
-        assertThrows(DomainException.class,
-                () -> platoUseCase.modificarPlato(5L, 0, "Nueva descripcion", 7L));
-
-        verifyNoInteractions(platoPersistencePort, restaurantePersistencePort);
-    }
-
-    @Test
-    void descripcionVacia_lanzaExcepcionSinConsultarNada() {
-        assertThrows(DomainException.class,
-                () -> platoUseCase.modificarPlato(5L, 30000, "   ", 7L));
-
-        verifyNoInteractions(platoPersistencePort, restaurantePersistencePort);
-    }
 }

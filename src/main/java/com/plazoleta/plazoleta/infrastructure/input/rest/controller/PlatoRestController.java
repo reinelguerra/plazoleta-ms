@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -63,7 +64,7 @@ public class PlatoRestController {
     @PostMapping
     public ResponseEntity<PlatoResponseDto> crearPlato(
             @AuthenticationPrincipal UsuarioAutenticado usuario,
-            @RequestBody PlatoRequestDto request) {
+            @Valid @RequestBody PlatoRequestDto request) {
         Long idPropietario = usuario == null ? null : usuario.id();
         Plato creado = platoHandler.crearPlato(platoRestMapper.toModel(request), idPropietario);
         return ResponseEntity.status(HttpStatus.CREATED).body(platoRestMapper.toResponse(creado));
@@ -82,7 +83,7 @@ public class PlatoRestController {
     public ResponseEntity<PlatoResponseDto> modificarPlato(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal UsuarioAutenticado usuario,
-            @RequestBody PlatoModificacionRequestDto request) {
+            @Valid @RequestBody PlatoModificacionRequestDto request) {
         Plato modificado = platoHandler.modificarPlato(
                 id, platoRestMapper.precioEntero(request.precio()), request.descripcion(), usuario.id());
         return ResponseEntity.ok(platoRestMapper.toResponse(modificado));
@@ -101,7 +102,7 @@ public class PlatoRestController {
     public ResponseEntity<PlatoResponseDto> cambiarEstadoPlato(
             @PathVariable("id") Long id,
             @AuthenticationPrincipal UsuarioAutenticado usuario,
-            @RequestBody PlatoEstadoRequestDto request) {
+            @Valid @RequestBody PlatoEstadoRequestDto request) {
         Plato actualizado = platoHandler.cambiarEstadoPlato(id, request.activo(), usuario.id());
         return ResponseEntity.ok(platoRestMapper.toResponse(actualizado));
     }

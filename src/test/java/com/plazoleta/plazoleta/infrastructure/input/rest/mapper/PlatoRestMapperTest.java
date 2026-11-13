@@ -2,6 +2,7 @@ package com.plazoleta.plazoleta.infrastructure.input.rest.mapper;
 
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.model.Plato;
+import com.plazoleta.plazoleta.domain.util.MensajeError;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoRequestDto;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -22,9 +23,17 @@ class PlatoRestMapperTest {
     }
 
     @Test
-    void toModel_precioEntero_loConvierte() {
+    void toModel_copiaTodosLosCampos_yDejaIdYActivoSinAsignar() {
         Plato plato = mapper.toModel(request(new BigDecimal("15000")));
+
+        assertEquals("Hamburguesa", plato.getNombre());
         assertEquals(15000, plato.getPrecio());
+        assertEquals("Con queso", plato.getDescripcion());
+        assertEquals("http://imagenes.com/h.png", plato.getUrlImagen());
+        assertEquals("PLATO_FUERTE", plato.getCategoria());
+        assertEquals(1L, plato.getIdRestaurante());
+        assertNull(plato.getId());
+        assertNull(plato.getActivo());
     }
 
     @Test
@@ -34,10 +43,10 @@ class PlatoRestMapperTest {
     }
 
     @Test
-    void toModel_precioConDecimales_lanzaDomainException() {
-        DomainException excepcion = assertThrows(DomainException.class,
+    void toModel_precioConDecimales_lanzaElMensajeCentralizado() {
+        DomainException e = assertThrows(DomainException.class,
                 () -> mapper.toModel(request(new BigDecimal("15.5"))));
-        assertEquals("El precio debe ser un número entero mayor a 0", excepcion.getMessage());
+        assertEquals(MensajeError.PRECIO_PLATO_NO_ENTERO, e.getMessage());
     }
 
     @Test

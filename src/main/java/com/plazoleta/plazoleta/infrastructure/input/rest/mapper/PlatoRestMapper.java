@@ -24,6 +24,7 @@ public interface PlatoRestMapper {
 
     PlatoListadoResponse toListadoResponse(Plato plato);
 
+    /** El DTO ya validó que el precio es entero; esto es la conversión exacta al Integer del dominio. */
     @Named("precioEntero")
     default Integer precioEntero(BigDecimal precio) {
         if (precio == null) {
