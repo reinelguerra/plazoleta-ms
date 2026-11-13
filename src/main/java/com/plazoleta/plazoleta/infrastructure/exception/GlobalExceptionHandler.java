@@ -73,6 +73,12 @@ public class GlobalExceptionHandler {
                 "Falta el parámetro obligatorio '" + e.getParameterName() + "'");
     }
 
+        @ExceptionHandler(com.plazoleta.plazoleta.domain.exception.PedidoNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> pedidoNoEncontrado(
+            com.plazoleta.plazoleta.domain.exception.PedidoNoEncontradoException e) {
+        return construir(HttpStatus.NOT_FOUND, e.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> construir(HttpStatus status, String mensaje) {
         return ResponseEntity.status(status).body(new ErrorResponse(mensaje, status.value()));
     }

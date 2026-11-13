@@ -23,4 +23,9 @@ public class PedidoHandlerImpl implements PedidoHandler {
                                                           int pagina, int tamanio) {
         return pedidoServicePort.listarPedidosPorEstado(idEmpleado, estado, pagina, tamanio);
     }
+
+    @Override
+    public Pedido iniciarPreparacion(Long idPedido, Long idEmpleado) {
+        return pedidoServicePort.iniciarPreparacion(idPedido, idEmpleado);
+    }
 }

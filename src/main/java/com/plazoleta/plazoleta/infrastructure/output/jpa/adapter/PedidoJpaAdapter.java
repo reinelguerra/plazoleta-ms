@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Optional;
 
 public class PedidoJpaAdapter implements PedidoPersistencePort {
 
@@ -28,6 +29,11 @@ public class PedidoJpaAdapter implements PedidoPersistencePort {
     public Pedido guardarPedido(Pedido pedido) {
         PedidoEntity guardado = pedidoRepository.save(pedidoEntityMapper.toEntity(pedido));
         return pedidoEntityMapper.toModel(guardado);
+    }
+
+    @Override
+    public Optional<Pedido> obtenerPedidoPorId(Long idPedido) {
+        return pedidoRepository.findById(idPedido).map(pedidoEntityMapper::toModel);
     }
 
     @Override

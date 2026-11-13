@@ -2,6 +2,7 @@ package com.plazoleta.plazoleta.application.usecase;
 
 import com.plazoleta.plazoleta.domain.api.PedidoServicePort;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
+import com.plazoleta.plazoleta.domain.exception.PedidoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.UsuarioNoEncontradoException;
@@ -91,6 +92,35 @@ public class PedidoUseCase implements PedidoServicePort {
 
         return pedidoPersistencePort.listarPedidosPorRestauranteYEstado(
                 empleado.idRestaurante(), estado, pagina, tamanio);
+    }
+
+    @Override
+    public Pedido iniciarPreparacion(Long idPedido, Long idEmpleado) {
+        DatosUsuario empleado = usuarioClientPort.obtenerUsuarioPorId(idEmpleado)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(idEmpleado));
+        if (empleado.idRestaurante() == null) {
+            throw new DomainException(MensajeError.EMPLEADO_SIN_RESTAURANTE);
+        }
+
+        Pedido pedido = pedidoPersistencePort.obtenerPedidoPorId(idPedido)
+                .orElseThrow(() -> new PedidoNoEncontradoException(idPedido));
+        if (!empleado.idRestaurante().equals(pedido.getIdRestaurante())) {
+            throw new DomainException(MensajeError.PEDIDO_DE_OTRO_RESTAURANTE);
+        }
+        if (pedido.getEstado() != EstadoPedido.PENDIENTE) {
+            throw new DomainException(MensajeError.PEDIDO_NO_PENDIENTE);
+        }
+
+        EstadoPedido estadoAnterior = pedido.getEstado();
+        pedido.setIdEmpleado(idEmpleado);
+        pedido.setEstado(EstadoPedido.EN_PREPARACION);
+        Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
+
+        trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(
+                guardado.getId(), guardado.getIdCliente(), guardado.getIdRestaurante(),
+                guardado.getIdEmpleado(), estadoAnterior, guardado.getEstado()));
+
+        return guardado;
     }
 
     private void validarDatos(Pedido pedido) {
