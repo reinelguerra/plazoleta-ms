@@ -12,6 +12,10 @@ import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 
+/**
+ * Solo reglas de negocio de los platos: el restaurante y el plato existen y el propietario es el dueño.
+ * La forma de los datos (obligatorios, precio entero mayor a 0) se valida en los DTOs de entrada.
+ */
 public class PlatoUseCase implements PlatoServicePort {
 
     private final PlatoPersistencePort platoPersistencePort;
@@ -25,7 +29,6 @@ public class PlatoUseCase implements PlatoServicePort {
 
     @Override
     public Plato crearPlato(Plato plato, Long idPropietario) {
-        validarPlato(plato);
         Restaurante restaurante = restaurantePersistencePort.obtenerRestaurantePorId(plato.getIdRestaurante())
                 .orElseThrow(() -> new RestauranteNoEncontradoException(plato.getIdRestaurante()));
         if (idPropietario == null || !idPropietario.equals(restaurante.getIdPropietario())) {
@@ -37,9 +40,6 @@ public class PlatoUseCase implements PlatoServicePort {
 
     @Override
     public Plato modificarPlato(Long idPlato, Integer precio, String descripcion, Long idPropietario) {
-        validarPrecio(precio);
-        validarDescripcion(descripcion);
-
         Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
 
         plato.setPrecio(precio);
@@ -49,10 +49,6 @@ public class PlatoUseCase implements PlatoServicePort {
 
     @Override
     public Plato cambiarEstadoPlato(Long idPlato, Boolean activo, Long idPropietario) {
-        if (activo == null) {
-            throw new DomainException(MensajeError.ESTADO_PLATO_OBLIGATORIO);
-        }
-
         Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
         plato.setActivo(activo);
         return platoPersistencePort.guardarPlato(plato);
@@ -86,38 +82,6 @@ public class PlatoUseCase implements PlatoServicePort {
             throw new PropietarioNoAutorizadoException();
         }
         return plato;
-    }
-
-    private void validarPlato(Plato plato) {
-        if (plato == null) {
-            throw new DomainException(MensajeError.PLATO_OBLIGATORIO);
-        }
-        if (esVacio(plato.getNombre())) {
-            throw new DomainException(MensajeError.NOMBRE_PLATO_OBLIGATORIO);
-        }
-        validarPrecio(plato.getPrecio());
-        validarDescripcion(plato.getDescripcion());
-        if (esVacio(plato.getUrlImagen())) {
-            throw new DomainException(MensajeError.URL_IMAGEN_PLATO_OBLIGATORIA);
-        }
-        if (esVacio(plato.getCategoria())) {
-            throw new DomainException(MensajeError.CATEGORIA_PLATO_OBLIGATORIA);
-        }
-        if (plato.getIdRestaurante() == null) {
-            throw new DomainException(MensajeError.RESTAURANTE_PLATO_OBLIGATORIO);
-        }
-    }
-
-    private void validarPrecio(Integer precio) {
-        if (precio == null || precio <= 0) {
-            throw new DomainException(MensajeError.PRECIO_PLATO_INVALIDO);
-        }
-    }
-
-    private void validarDescripcion(String descripcion) {
-        if (esVacio(descripcion)) {
-            throw new DomainException(MensajeError.DESCRIPCION_PLATO_OBLIGATORIA);
-        }
     }
 
     private boolean esVacio(String valor) {
