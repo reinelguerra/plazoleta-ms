@@ -2,6 +2,7 @@ package com.plazoleta.plazoleta.infrastructure.input.rest.mapper;
 
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.model.Plato;
+import com.plazoleta.plazoleta.domain.util.MensajeError;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoListadoResponse;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoRequestDto;
 import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PlatoResponseDto;
@@ -31,7 +32,7 @@ public interface PlatoRestMapper {
         try {
             return precio.intValueExact();
         } catch (ArithmeticException e) {
-            throw new DomainException("El precio debe ser un número entero mayor a 0");
+            throw new DomainException(MensajeError.PRECIO_PLATO_NO_ENTERO);
         }
     }
 }

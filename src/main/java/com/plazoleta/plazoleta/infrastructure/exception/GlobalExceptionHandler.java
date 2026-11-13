@@ -11,7 +11,6 @@ import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 
 
 @RestControllerAdvice
@@ -56,12 +55,7 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.FORBIDDEN, e.getMessage());
     }
 
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<ErrorResponse> cabeceraFaltante(MissingRequestHeaderException e) {
-        return construir(HttpStatus.BAD_REQUEST, "Falta la cabecera obligatoria '" + e.getHeaderName() + "'");
-    }
-
-        @ExceptionHandler(ServicioTrazabilidadNoDisponibleException.class)
+    @ExceptionHandler(ServicioTrazabilidadNoDisponibleException.class)
     public ResponseEntity<ErrorResponse> trazabilidadNoDisponible(ServicioTrazabilidadNoDisponibleException e) {
         return construir(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }

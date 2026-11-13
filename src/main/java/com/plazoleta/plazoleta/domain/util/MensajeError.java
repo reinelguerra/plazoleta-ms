@@ -47,6 +47,18 @@ public final class MensajeError {
     public static final String PEDIDO_NO_PENDIENTE =
             "Solo se puede tomar un pedido en estado PENDIENTE";
 
+    // Platos (HU 3, 4 y 7)
+    public static final String PLATO_OBLIGATORIO = "Los datos del plato son obligatorios";
+    public static final String NOMBRE_PLATO_OBLIGATORIO = "El nombre del plato es obligatorio";
+    public static final String PRECIO_PLATO_INVALIDO =
+            "El precio es obligatorio y debe ser un n\u00famero entero mayor a 0";
+    public static final String PRECIO_PLATO_NO_ENTERO = "El precio debe ser un n\u00famero entero mayor a 0";
+    public static final String DESCRIPCION_PLATO_OBLIGATORIA = "La descripci\u00f3n es obligatoria";
+    public static final String URL_IMAGEN_PLATO_OBLIGATORIA = "La URL de la imagen es obligatoria";
+    public static final String CATEGORIA_PLATO_OBLIGATORIA = "La categor\u00eda es obligatoria";
+    public static final String RESTAURANTE_PLATO_OBLIGATORIO = "El restaurante del plato es obligatorio";
+    public static final String ESTADO_PLATO_OBLIGATORIO = "El estado del plato es obligatorio";
+
     private MensajeError() {
     }
 }

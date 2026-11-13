@@ -5,18 +5,14 @@ import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.PropietarioNoAutorizadoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Plato;
 import com.plazoleta.plazoleta.domain.model.Restaurante;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
-import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 
 public class PlatoUseCase implements PlatoServicePort {
-
-    private static final String MSG_PRECIO_INVALIDO = "El precio es obligatorio y debe ser un número entero mayor a 0";
-    private static final String MSG_DESCRIPCION_OBLIGATORIA = "La descripción es obligatoria";
-    private static final String MSG_ESTADO_OBLIGATORIO = "El estado del plato es obligatorio";
 
     private final PlatoPersistencePort platoPersistencePort;
     private final RestaurantePersistencePort restaurantePersistencePort;
@@ -50,10 +46,11 @@ public class PlatoUseCase implements PlatoServicePort {
         plato.setDescripcion(descripcion);
         return platoPersistencePort.guardarPlato(plato);
     }
-        @Override
+
+    @Override
     public Plato cambiarEstadoPlato(Long idPlato, Boolean activo, Long idPropietario) {
         if (activo == null) {
-            throw new DomainException(MSG_ESTADO_OBLIGATORIO);
+            throw new DomainException(MensajeError.ESTADO_PLATO_OBLIGATORIO);
         }
 
         Plato plato = obtenerPlatoDelPropietario(idPlato, idPropietario);
@@ -61,7 +58,7 @@ public class PlatoUseCase implements PlatoServicePort {
         return platoPersistencePort.guardarPlato(plato);
     }
 
-        @Override
+    @Override
     public PaginaRespuesta<Plato> listarPlatos(Long idRestaurante, String categoria, int pagina, int tamanio) {
         if (idRestaurante == null) {
             throw new DomainException(MensajeError.RESTAURANTE_OBLIGATORIO);
@@ -93,33 +90,33 @@ public class PlatoUseCase implements PlatoServicePort {
 
     private void validarPlato(Plato plato) {
         if (plato == null) {
-            throw new DomainException("Los datos del plato son obligatorios");
+            throw new DomainException(MensajeError.PLATO_OBLIGATORIO);
         }
         if (esVacio(plato.getNombre())) {
-            throw new DomainException("El nombre del plato es obligatorio");
+            throw new DomainException(MensajeError.NOMBRE_PLATO_OBLIGATORIO);
         }
         validarPrecio(plato.getPrecio());
         validarDescripcion(plato.getDescripcion());
         if (esVacio(plato.getUrlImagen())) {
-            throw new DomainException("La URL de la imagen es obligatoria");
+            throw new DomainException(MensajeError.URL_IMAGEN_PLATO_OBLIGATORIA);
         }
         if (esVacio(plato.getCategoria())) {
-            throw new DomainException("La categoría es obligatoria");
+            throw new DomainException(MensajeError.CATEGORIA_PLATO_OBLIGATORIA);
         }
         if (plato.getIdRestaurante() == null) {
-            throw new DomainException("El restaurante del plato es obligatorio");
+            throw new DomainException(MensajeError.RESTAURANTE_PLATO_OBLIGATORIO);
         }
     }
 
     private void validarPrecio(Integer precio) {
         if (precio == null || precio <= 0) {
-            throw new DomainException(MSG_PRECIO_INVALIDO);
+            throw new DomainException(MensajeError.PRECIO_PLATO_INVALIDO);
         }
     }
 
     private void validarDescripcion(String descripcion) {
         if (esVacio(descripcion)) {
-            throw new DomainException(MSG_DESCRIPCION_OBLIGATORIA);
+            throw new DomainException(MensajeError.DESCRIPCION_PLATO_OBLIGATORIA);
         }
     }
 

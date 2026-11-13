@@ -1,4 +1,4 @@
-package com.plazoleta.plazoleta.infrastructure.input.rest;
+package com.plazoleta.plazoleta.infrastructure.input.rest.controller;
 
 import com.plazoleta.plazoleta.application.handler.PlatoHandler;
 import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
