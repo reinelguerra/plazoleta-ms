@@ -4,7 +4,10 @@ import com.plazoleta.plazoleta.domain.api.PedidoServicePort;
 import com.plazoleta.plazoleta.domain.exception.DomainException;
 import com.plazoleta.plazoleta.domain.exception.PlatoNoEncontradoException;
 import com.plazoleta.plazoleta.domain.exception.RestauranteNoEncontradoException;
+import com.plazoleta.plazoleta.domain.exception.UsuarioNoEncontradoException;
+import com.plazoleta.plazoleta.domain.model.DatosUsuario;
 import com.plazoleta.plazoleta.domain.model.EstadoPedido;
+import com.plazoleta.plazoleta.domain.model.PaginaRespuesta;
 import com.plazoleta.plazoleta.domain.model.Pedido;
 import com.plazoleta.plazoleta.domain.model.PedidoPlato;
 import com.plazoleta.plazoleta.domain.model.Plato;
@@ -13,6 +16,7 @@ import com.plazoleta.plazoleta.domain.spi.PedidoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.TrazabilidadClientPort;
+import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 
 import java.time.LocalDateTime;
@@ -26,15 +30,18 @@ public class PedidoUseCase implements PedidoServicePort {
     private final PlatoPersistencePort platoPersistencePort;
     private final RestaurantePersistencePort restaurantePersistencePort;
     private final TrazabilidadClientPort trazabilidadClientPort;
+    private final UsuarioClientPort usuarioClientPort;
 
     public PedidoUseCase(PedidoPersistencePort pedidoPersistencePort,
                          PlatoPersistencePort platoPersistencePort,
                          RestaurantePersistencePort restaurantePersistencePort,
-                         TrazabilidadClientPort trazabilidadClientPort) {
+                         TrazabilidadClientPort trazabilidadClientPort,
+                         UsuarioClientPort usuarioClientPort) {
         this.pedidoPersistencePort = pedidoPersistencePort;
         this.platoPersistencePort = platoPersistencePort;
         this.restaurantePersistencePort = restaurantePersistencePort;
         this.trazabilidadClientPort = trazabilidadClientPort;
+        this.usuarioClientPort = usuarioClientPort;
     }
 
     @Override
@@ -61,6 +68,29 @@ public class PedidoUseCase implements PedidoServicePort {
                 guardado.getIdEmpleado(), null, guardado.getEstado()));
 
         return guardado;
+    }
+
+    @Override
+    public PaginaRespuesta<Pedido> listarPedidosPorEstado(Long idEmpleado, EstadoPedido estado,
+                                                          int pagina, int tamanio) {
+        if (estado == null) {
+            throw new DomainException(MensajeError.ESTADO_PEDIDO_OBLIGATORIO);
+        }
+        if (pagina < 0) {
+            throw new DomainException(MensajeError.PAGINA_NEGATIVA);
+        }
+        if (tamanio < 1) {
+            throw new DomainException(MensajeError.TAMANIO_PAGINA_INVALIDO);
+        }
+
+        DatosUsuario empleado = usuarioClientPort.obtenerUsuarioPorId(idEmpleado)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(idEmpleado));
+        if (empleado.idRestaurante() == null) {
+            throw new DomainException(MensajeError.EMPLEADO_SIN_RESTAURANTE);
+        }
+
+        return pedidoPersistencePort.listarPedidosPorRestauranteYEstado(
+                empleado.idRestaurante(), estado, pagina, tamanio);
     }
 
     private void validarDatos(Pedido pedido) {
