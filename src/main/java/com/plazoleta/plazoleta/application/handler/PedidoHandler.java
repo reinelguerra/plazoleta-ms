@@ -12,6 +12,8 @@ public interface PedidoHandler {
     PaginaRespuesta<Pedido> listarPedidosPorEstado(Long idEmpleado, EstadoPedido estado, int pagina, int tamanio);
 
     Pedido iniciarPreparacion(Long idPedido, Long idEmpleado);
+    
+    Pedido marcarPedidoListo(Long idPedido, Long idEmpleado);
 
     /** El cliente cancela su pedido mientras este PENDIENTE. */
     Pedido cancelarPedido(Long idPedido, Long idCliente);

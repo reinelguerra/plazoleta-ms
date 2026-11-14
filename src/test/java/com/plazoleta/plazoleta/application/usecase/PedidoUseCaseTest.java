@@ -59,8 +59,7 @@ class PedidoUseCaseTest {
 
     @BeforeEach
     void preparar() {
-        pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort, restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort);
-    }
+              pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort, restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort, null, null);   }
 
     private Pedido pedido(PedidoPlato... platos) {
         Pedido pedido = new Pedido();
