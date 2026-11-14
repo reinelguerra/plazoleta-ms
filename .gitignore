@@ -33,3 +33,6 @@ build/
 .vscode/
 
 iniciar.ps1
+
+# Datos de la demo con tokens
+docs/demo/*.local.txt
