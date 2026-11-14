@@ -29,6 +29,11 @@ public class PedidoHandlerImpl implements PedidoHandler {
         return pedidoServicePort.iniciarPreparacion(idPedido, idEmpleado);
     }
 
+        @Override
+    public Pedido marcarPedidoListo(Long idPedido, Long idEmpleado) {
+        return pedidoServicePort.marcarPedidoListo(idPedido, idEmpleado);
+    }
+
     @Override
     public Pedido cancelarPedido(Long idPedido, Long idCliente) {
         return pedidoServicePort.cancelarPedido(idPedido, idCliente);

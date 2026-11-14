@@ -19,6 +19,8 @@ import com.plazoleta.plazoleta.domain.spi.PlatoPersistencePort;
 import com.plazoleta.plazoleta.domain.spi.RestaurantePersistencePort;
 import com.plazoleta.plazoleta.domain.spi.TrazabilidadClientPort;
 import com.plazoleta.plazoleta.domain.spi.UsuarioClientPort;
+import com.plazoleta.plazoleta.domain.spi.GeneradorPinPort;
+import com.plazoleta.plazoleta.domain.spi.MensajeriaClientPort;
 import com.plazoleta.plazoleta.domain.util.MensajeError;
 
 import java.time.LocalDateTime;
@@ -28,24 +30,31 @@ import java.util.Set;
 
 public class PedidoUseCase implements PedidoServicePort {
 
+      private static final String PLANTILLA_SMS = "Tu pedido %d esta listo para recoger. PIN de entrega: %s";
+
     private final PedidoPersistencePort pedidoPersistencePort;
     private final PlatoPersistencePort platoPersistencePort;
     private final RestaurantePersistencePort restaurantePersistencePort;
     private final TrazabilidadClientPort trazabilidadClientPort;
     private final UsuarioClientPort usuarioClientPort;
+    private final MensajeriaClientPort mensajeriaClientPort;
+    private final GeneradorPinPort generadorPinPort;
 
     public PedidoUseCase(PedidoPersistencePort pedidoPersistencePort,
                          PlatoPersistencePort platoPersistencePort,
                          RestaurantePersistencePort restaurantePersistencePort,
                          TrazabilidadClientPort trazabilidadClientPort,
-                         UsuarioClientPort usuarioClientPort) {
+                         UsuarioClientPort usuarioClientPort,
+                         MensajeriaClientPort mensajeriaClientPort,
+                         GeneradorPinPort generadorPinPort) {
         this.pedidoPersistencePort = pedidoPersistencePort;
         this.platoPersistencePort = platoPersistencePort;
         this.restaurantePersistencePort = restaurantePersistencePort;
         this.trazabilidadClientPort = trazabilidadClientPort;
         this.usuarioClientPort = usuarioClientPort;
+        this.mensajeriaClientPort = mensajeriaClientPort;
+        this.generadorPinPort = generadorPinPort;
     }
-
     @Override
     public Pedido realizarPedido(Pedido pedido) {
         validarDatos(pedido);
@@ -115,6 +124,45 @@ public class PedidoUseCase implements PedidoServicePort {
         EstadoPedido estadoAnterior = pedido.getEstado();
         pedido.setIdEmpleado(idEmpleado);
         pedido.setEstado(EstadoPedido.EN_PREPARACION);
+        Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
+
+        trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(
+                guardado.getId(), guardado.getIdCliente(), guardado.getIdRestaurante(),
+                guardado.getIdEmpleado(), estadoAnterior, guardado.getEstado()));
+
+        return guardado;
+    }
+
+        @Override
+    public Pedido marcarPedidoListo(Long idPedido, Long idEmpleado) {
+        DatosUsuario empleado = usuarioClientPort.obtenerUsuarioPorId(idEmpleado)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(idEmpleado));
+        if (empleado.idRestaurante() == null) {
+            throw new DomainException(MensajeError.EMPLEADO_SIN_RESTAURANTE);
+        }
+
+        Pedido pedido = pedidoPersistencePort.obtenerPedidoPorId(idPedido)
+                .orElseThrow(() -> new PedidoNoEncontradoException(idPedido));
+        if (!empleado.idRestaurante().equals(pedido.getIdRestaurante())) {
+            throw new DomainException(MensajeError.PEDIDO_DE_OTRO_RESTAURANTE);
+        }
+        if (pedido.getEstado() != EstadoPedido.EN_PREPARACION) {
+            throw new DomainException(MensajeError.PEDIDO_NO_EN_PREPARACION);
+        }
+
+        DatosUsuario cliente = usuarioClientPort.obtenerUsuarioPorId(pedido.getIdCliente())
+                .orElseThrow(() -> new UsuarioNoEncontradoException(pedido.getIdCliente()));
+        if (cliente.celular() == null || cliente.celular().isBlank()) {
+            throw new DomainException(MensajeError.CLIENTE_SIN_CELULAR);
+        }
+
+        String pin = generadorPinPort.generar();
+        // Primero el SMS: si mensajería falla, el pedido sigue EN_PREPARACION y se puede reintentar.
+        mensajeriaClientPort.enviarSms(cliente.celular(), String.format(PLANTILLA_SMS, idPedido, pin));
+
+        EstadoPedido estadoAnterior = pedido.getEstado();
+        pedido.setPin(pin);
+        pedido.setEstado(EstadoPedido.LISTO);
         Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
 
         trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(

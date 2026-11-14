@@ -59,9 +59,9 @@ class PedidoUseCaseAsignacionTest {
 
     @BeforeEach
     void preparar() {
-        pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort,
-                restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort);
-    }
+               pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort,
+                restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort,
+                null, null);}
 
     private void empleadoConRestaurante(Long idRestaurante) {
         when(usuarioClientPort.obtenerUsuarioPorId(ID_EMPLEADO)).thenReturn(Optional.of(

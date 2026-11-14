@@ -46,7 +46,11 @@ public final class MensajeError {
             "El pedido no pertenece al restaurante del empleado";
     public static final String PEDIDO_NO_PENDIENTE =
             "Solo se puede tomar un pedido en estado PENDIENTE";
-
+            public static final String PEDIDO_NO_EN_PREPARACION =
+            "Solo se puede marcar como listo un pedido en estado EN_PREPARACION";
+    public static final String CLIENTE_SIN_CELULAR = "El cliente del pedido no tiene un celular registrado";
+    public static final String MENSAJERIA_NO_DISPONIBLE =
+            "No fue posible enviar el SMS al cliente: el servicio de mensajería no está disponible";
     // Platos (HU 3, 4 y 7)
     public static final String PLATO_OBLIGATORIO = "Los datos del plato son obligatorios";
     public static final String NOMBRE_PLATO_OBLIGATORIO = "El nombre del plato es obligatorio";

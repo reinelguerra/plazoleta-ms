@@ -60,6 +60,11 @@ public class GlobalExceptionHandler {
         return construir(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
     }
 
+        @ExceptionHandler(ServicioMensajeriaNoDisponibleException.class)
+    public ResponseEntity<ErrorResponse> mensajeriaNoDisponible(ServicioMensajeriaNoDisponibleException e) {
+        return construir(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
+    }
+
         @ExceptionHandler(org.springframework.web.bind.MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> parametroFaltante(
             org.springframework.web.bind.MissingServletRequestParameterException e) {

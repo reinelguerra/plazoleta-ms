@@ -56,9 +56,9 @@ class PedidoUseCaseCancelacionTest {
 
     @BeforeEach
     void preparar() {
-        pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort,
-                restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort);
-    }
+            pedidoUseCase = new PedidoUseCase(pedidoPersistencePort, platoPersistencePort,
+                restaurantePersistencePort, trazabilidadClientPort, usuarioClientPort,
+                null, null);}
 
     private Pedido pedido(Long idCliente, EstadoPedido estado) {
         Pedido pedido = new Pedido();
