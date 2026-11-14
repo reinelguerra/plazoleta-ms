@@ -5,7 +5,7 @@
 .DESCRIPTION
   Correr JUSTO despues de cargar-demo.ps1 con datos recien cargados.
   Necesita corriendo: usuarios-ms (8081), plazoleta-ms (8082) y trazabilidad-ms (8084),
-  porque crear un pedido registra el log en trazabilidad.
+  porque crear un pedido registra el log en trazabilidad. La seccion D necesita ademas mensajeria-ms (8083).
   Deja pedidos creados: para repetirlo hay que reiniciar plazoleta-ms y volver a cargar los datos.
 
 .EXAMPLE
@@ -133,6 +133,44 @@ if ($crear2.Status -eq 201) {
     Verificar "Cliente 2 cancela su pedido PENDIENTE" 200 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido2/cancelacion" $null $tCli2)
     Verificar "Cancelar un pedido ya cancelado" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido2/cancelacion" $null $tCli2)
 }
+
+function Anotar([string]$Nombre, [bool]$Ok) {
+    $resultados.Add([pscustomobject]@{ Caso = $Nombre; Ok = $Ok })
+    $etiqueta = "FAIL"; $color = "Red"
+    if ($Ok) { $etiqueta = "PASS"; $color = "Green" }
+    Write-Host ("{0}  {1}" -f $etiqueta, $Nombre) -ForegroundColor $color
+}
+
+Write-Host ""
+Write-Host "== D. HU 14: marcar como listo (SMS con PIN) =="
+Verificar "Sin token: marcar listo" 401 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/listo")
+Verificar "Cliente no marca listo" 403 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/listo" $null $tCli1)
+Verificar "Pedido inexistente (listo)" 404 (Invocar "PATCH" "$UrlPlazoleta/pedidos/987654321/listo" $null $tEmp1)
+Verificar "Empleado de otro restaurante (listo)" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/listo" $null $tEmp2) "no pertenece al restaurante"
+$crear3 = Invocar "POST" "$UrlPlazoleta/pedidos" $pedido2 $tCli2
+Verificar "Cliente 2 crea otro pedido" 201 $crear3
+if ($crear3.Status -eq 201) {
+    $idPedido3 = [long]$crear3.Json.id
+    Verificar "Marcar listo un pedido PENDIENTE" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido3/listo" $null $tEmp2) "Solo se puede marcar como listo"
+}
+$listo = Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/listo" $null $tEmp1
+Verificar "Empleado marca listo su pedido (envia el SMS)" 200 $listo
+if ($listo.Status -eq 200) {
+    Anotar "La respuesta de listo trae estado LISTO" ($listo.Json.estado -eq "LISTO")
+    Anotar "La respuesta de listo NO expone el pin" (-not ($listo.Json.PSObject.Properties.Name -contains "pin"))
+}
+Verificar "Marcar listo un pedido ya LISTO" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/listo" $null $tEmp1) "Solo se puede marcar como listo"
+Verificar "Cancelar un pedido LISTO" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/cancelacion" $null $tCli1) "no puede cancelarse"
+$lista = Invocar "GET" "$UrlPlazoleta/pedidos?estado=LISTO" $null $tEmp1
+$enLista = $false; $conPin = $false
+if ($lista.Status -eq 200 -and $lista.Json) {
+    foreach ($p in @($lista.Json.contenido)) {
+        if ([long]$p.id -eq $idPedido1) { $enLista = $true }
+        if ($p.PSObject.Properties.Name -contains "pin") { $conPin = $true }
+    }
+}
+Anotar "El listado ?estado=LISTO incluye el pedido" $enLista
+Anotar "El listado no expone el pin" (-not $conPin)
 
 $fallos = @($resultados | Where-Object { -not $_.Ok })
 Write-Host ""
