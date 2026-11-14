@@ -113,7 +113,31 @@ public class PedidoRestController {
         Pedido pedido = pedidoHandler.iniciarPreparacion(idPedido, idEmpleado);
         return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
     }
-
+    @Operation(summary = "Marcar un pedido como LISTO y avisar al cliente por SMS",
+            description = "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar EN_PREPARACION. "
+                    + "Se genera un PIN de 6 dígitos que se envía al celular del cliente por SMS (el PIN no "
+                    + "se devuelve en la respuesta) y se registra el cambio en trazabilidad. Si el SMS no se "
+                    + "puede enviar, el pedido no cambia de estado y se puede reintentar.")
+    @ApiResponse(responseCode = "400",
+            description = "El pedido no es del restaurante del empleado, no está EN_PREPARACION, el empleado "
+                    + "no tiene restaurante asignado o el cliente no tiene celular",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Sin permiso: el rol del token no es EMPLEADO",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "No existe el pedido, el empleado o el cliente",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503",
+            description = "Usuarios, mensajería o trazabilidad no están disponibles",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @PatchMapping("/{idPedido}/listo")
+    public ResponseEntity<PedidoResponseDto> marcarPedidoListo(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @Parameter(description = "Id del pedido", example = "1")
+            @PathVariable("idPedido") Long idPedido) {
+        Long idEmpleado = usuario == null ? null : usuario.id();
+        Pedido pedido = pedidoHandler.marcarPedidoListo(idPedido, idEmpleado);
+        return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
+    }
     @Operation(summary = "Listar los pedidos por estado",
             description = "Solo el EMPLEADO. Devuelve únicamente los pedidos del restaurante al que pertenece "
                     + "el empleado (se consulta en usuarios-ms), del más antiguo al más reciente y paginados. "
