@@ -71,7 +71,7 @@ Los ids reales de restaurantes y platos están en la tabla que imprime el script
 14. *Cliente 2*: `PATCH /pedidos/{su id}/cancelacion` responde 200 con `CANCELADO`.
 
 **Pedido listo y entrega (HU 14 y 15)** — *completar con las rutas finales de Reinel*
-15. *Empleado 1*: `PATCH /pedidos/{id}/listo` sobre el pedido del paso 10. Responde 200 con estado `LISTO` y sin `pin`. Se genera el PIN y mensajeria-ms envía el SMS al celular del cliente 1. Con mensajería en modo simulado el PIN aparece en el log de ese servicio. Con mensajería apagada responde 503 y el pedido queda LISTO (limitación documentada).
+15. *Empleado 1*: `PATCH /pedidos/{id}/listo` sobre el pedido del paso 10. Responde 200 con estado `LISTO` y sin `pin`. Se genera el PIN y mensajeria-ms envia el SMS al celular del cliente 1; con mensajeria en modo simulado el PIN aparece en el log de ese servicio. Si mensajeria esta apagada responde 503 y el pedido NO cambia de estado (el SMS se envia antes de guardar).
 16. *Empleado 1*: entregar con un PIN incorrecto (debe fallar) y luego con el PIN del SMS (pasa a `ENTREGADO`).
 17. Mostrar el historial completo del pedido en trazabilidad-ms.
 
