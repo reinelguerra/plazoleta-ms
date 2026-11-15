@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.plazoleta.plazoleta.infrastructure.input.rest.dto.PedidoEntregaRequestDto;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.DATOS_INVALIDOS;
 import static com.plazoleta.plazoleta.infrastructure.input.rest.DocumentacionApi.NO_AUTENTICADO;
 
@@ -138,6 +138,32 @@ public class PedidoRestController {
         Pedido pedido = pedidoHandler.marcarPedidoListo(idPedido, idEmpleado);
         return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
     }
+
+        @Operation(summary = "Entregar un pedido LISTO con el PIN",
+            description = "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar LISTO, y el PIN "
+                    + "debe coincidir con el que recibió el cliente por SMS. Pasa a ENTREGADO y se registra "
+                    + "el cambio en trazabilidad. Con un PIN incorrecto el pedido no cambia.")
+    @ApiResponse(responseCode = "400",
+            description = "PIN ausente o con formato inválido, PIN incorrecto, el pedido no está LISTO, no es "
+                    + "del restaurante del empleado o el empleado no tiene restaurante asignado",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "403", description = "Sin permiso: el rol del token no es EMPLEADO",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "404", description = "No existe el pedido o el empleado",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @ApiResponse(responseCode = "503", description = "Usuarios o trazabilidad no están disponibles",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    @PatchMapping("/{idPedido}/entrega")
+    public ResponseEntity<PedidoResponseDto> entregarPedido(
+            @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @Parameter(description = "Id del pedido", example = "1")
+            @PathVariable("idPedido") Long idPedido,
+            @Valid @RequestBody PedidoEntregaRequestDto request) {
+        Long idEmpleado = usuario == null ? null : usuario.id();
+        Pedido pedido = pedidoHandler.entregarPedido(idPedido, idEmpleado, request.pin());
+        return ResponseEntity.ok(pedidoRestMapper.toResponse(pedido));
+    }
+
     @Operation(summary = "Listar los pedidos por estado",
             description = "Solo el EMPLEADO. Devuelve únicamente los pedidos del restaurante al que pertenece "
                     + "el empleado (se consulta en usuarios-ms), del más antiguo al más reciente y paginados. "
