@@ -23,8 +23,17 @@ public class MensajeriaClientAdapter implements MensajeriaClientPort {
             @Value("${mensajeria.service.url:http://localhost:8083/api/v1}") String baseUrl) {
         this(RestClient.builder()
                 .baseUrl(baseUrl)
+                .requestFactory(fabricaConTimeouts())
                 .requestInterceptor(new ReenviarAutorizacionInterceptor())
                 .build());
+    }
+
+    private static org.springframework.http.client.ClientHttpRequestFactory fabricaConTimeouts() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory fabrica =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        fabrica.setConnectTimeout(java.time.Duration.ofSeconds(3));
+        fabrica.setReadTimeout(java.time.Duration.ofSeconds(5));
+        return fabrica;
     }
 
     MensajeriaClientAdapter(RestClient restClient) {
