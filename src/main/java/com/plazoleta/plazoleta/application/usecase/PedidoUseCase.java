@@ -172,6 +172,37 @@ public class PedidoUseCase implements PedidoServicePort {
         return guardado;
     }
 
+        @Override
+    public Pedido entregarPedido(Long idPedido, Long idEmpleado, String pin) {
+        DatosUsuario empleado = usuarioClientPort.obtenerUsuarioPorId(idEmpleado)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(idEmpleado));
+        if (empleado.idRestaurante() == null) {
+            throw new DomainException(MensajeError.EMPLEADO_SIN_RESTAURANTE);
+        }
+
+        Pedido pedido = pedidoPersistencePort.obtenerPedidoPorId(idPedido)
+                .orElseThrow(() -> new PedidoNoEncontradoException(idPedido));
+        if (!empleado.idRestaurante().equals(pedido.getIdRestaurante())) {
+            throw new DomainException(MensajeError.PEDIDO_DE_OTRO_RESTAURANTE);
+        }
+        if (pedido.getEstado() != EstadoPedido.LISTO) {
+            throw new DomainException(MensajeError.PEDIDO_NO_LISTO);
+        }
+        if (pin == null || !pin.equals(pedido.getPin())) {
+            throw new DomainException(MensajeError.PIN_INCORRECTO);
+        }
+
+        EstadoPedido estadoAnterior = pedido.getEstado();
+        pedido.setEstado(EstadoPedido.ENTREGADO);
+        Pedido guardado = pedidoPersistencePort.guardarPedido(pedido);
+
+        trazabilidadClientPort.registrarCambioEstado(new RegistroTrazabilidad(
+                guardado.getId(), guardado.getIdCliente(), guardado.getIdRestaurante(),
+                guardado.getIdEmpleado(), estadoAnterior, guardado.getEstado()));
+
+        return guardado;
+    }
+
     @Override
     public Pedido cancelarPedido(Long idPedido, Long idCliente) {
         Pedido pedido = pedidoPersistencePort.obtenerPedidoPorId(idPedido)

@@ -51,6 +51,10 @@ public final class MensajeError {
     public static final String CLIENTE_SIN_CELULAR = "El cliente del pedido no tiene un celular registrado";
     public static final String MENSAJERIA_NO_DISPONIBLE =
             "No fue posible enviar el SMS al cliente: el servicio de mensajería no está disponible";
+                // Entregar pedido (HU 15)
+    public static final String PEDIDO_NO_LISTO = "Solo se puede entregar un pedido en estado LISTO";
+    public static final String PIN_OBLIGATORIO = "El PIN de entrega es obligatorio y debe tener 6 dígitos";
+    public static final String PIN_INCORRECTO = "El PIN de entrega no es correcto";
     // Platos (HU 3, 4 y 7)
     public static final String PLATO_OBLIGATORIO = "Los datos del plato son obligatorios";
     public static final String NOMBRE_PLATO_OBLIGATORIO = "El nombre del plato es obligatorio";
