@@ -34,6 +34,11 @@ public class PedidoHandlerImpl implements PedidoHandler {
         return pedidoServicePort.marcarPedidoListo(idPedido, idEmpleado);
     }
 
+        @Override
+    public Pedido entregarPedido(Long idPedido, Long idEmpleado, String pin) {
+        return pedidoServicePort.entregarPedido(idPedido, idEmpleado, pin);
+    }
+
     @Override
     public Pedido cancelarPedido(Long idPedido, Long idCliente) {
         return pedidoServicePort.cancelarPedido(idPedido, idCliente);

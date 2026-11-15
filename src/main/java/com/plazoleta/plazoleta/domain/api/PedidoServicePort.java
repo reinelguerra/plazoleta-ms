@@ -17,7 +17,10 @@ public interface PedidoServicePort {
 
         /** El empleado marca EN_PREPARACION → LISTO, se genera el PIN y se avisa al cliente por SMS. */
     Pedido marcarPedidoListo(Long idPedido, Long idEmpleado);
-
+    
+        /** El empleado entrega un pedido LISTO: se valida el PIN y pasa a ENTREGADO. */
+    Pedido entregarPedido(Long idPedido, Long idEmpleado, String pin);
+    
     /** El cliente cancela su pedido mientras este PENDIENTE. */
     Pedido cancelarPedido(Long idPedido, Long idCliente);
 }
