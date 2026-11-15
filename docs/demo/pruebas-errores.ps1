@@ -172,6 +172,33 @@ if ($lista.Status -eq 200 -and $lista.Json) {
 Anotar "El listado ?estado=LISTO incluye el pedido" $enLista
 Anotar "El listado no expone el pin" (-not $conPin)
 
+Write-Host ""
+Write-Host "== E. HU 15: entregar pedido con PIN =="
+$urlEntrega = "$UrlPlazoleta/pedidos/$idPedido1/entrega"
+Verificar "Sin token: entregar" 401 (Invocar "PATCH" $urlEntrega @{ pin = "123456" })
+Verificar "Cliente no entrega" 403 (Invocar "PATCH" $urlEntrega @{ pin = "123456" } $tCli1)
+Verificar "Pedido inexistente (entrega)" 404 (Invocar "PATCH" "$UrlPlazoleta/pedidos/987654321/entrega" @{ pin = "123456" } $tEmp1)
+Verificar "PIN vacio" 400 (Invocar "PATCH" $urlEntrega @{ pin = "" } $tEmp1) "PIN de entrega es obligatorio"
+Verificar "PIN con menos de 6 digitos" 400 (Invocar "PATCH" $urlEntrega @{ pin = "12" } $tEmp1) "PIN de entrega es obligatorio"
+Verificar "Empleado de otro restaurante (entrega)" 400 (Invocar "PATCH" $urlEntrega @{ pin = "123456" } $tEmp2) "no pertenece al restaurante"
+if ($idPedido3) {
+    Verificar "Entregar un pedido que no esta LISTO" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido3/entrega" @{ pin = "123456" } $tEmp2) "Solo se puede entregar"
+}
+Verificar "PIN incorrecto" 400 (Invocar "PATCH" $urlEntrega @{ pin = "000000" } $tEmp1) "no es correcto"
+$pinDemo = Read-Host "PIN del pedido $idPedido1 (esta en el log de mensajeria-ms o llego por SMS; Enter para omitir)"
+if ($pinDemo) {
+    $entrega = Invocar "PATCH" $urlEntrega @{ pin = $pinDemo } $tEmp1
+    Verificar "PIN correcto: pedido entregado" 200 $entrega
+    if ($entrega.Status -eq 200) {
+        Anotar "La respuesta de entrega trae estado ENTREGADO" ($entrega.Json.estado -eq "ENTREGADO")
+        Anotar "La respuesta de entrega NO expone el pin" (-not ($entrega.Json.PSObject.Properties.Name -contains "pin"))
+    }
+    Verificar "Entregar un pedido ya ENTREGADO" 400 (Invocar "PATCH" $urlEntrega @{ pin = $pinDemo } $tEmp1) "Solo se puede entregar"
+    Verificar "Cancelar un pedido ENTREGADO" 400 (Invocar "PATCH" "$UrlPlazoleta/pedidos/$idPedido1/cancelacion" $null $tCli1) "no puede cancelarse"
+} else {
+    Write-Host "(Camino feliz de entrega omitido: no se escribio un PIN)" -ForegroundColor Yellow
+}
+
 $fallos = @($resultados | Where-Object { -not $_.Ok })
 Write-Host ""
 if ($fallos.Count -eq 0) {
