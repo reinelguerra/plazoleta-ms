@@ -594,6 +594,158 @@
         }
       }
     },
+    "/api/v1/pedidos/{idPedido}/listo" : {
+      "patch" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Marcar un pedido como LISTO y avisar al cliente por SMS",
+        "description" : "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar EN_PREPARACION. Se genera un PIN de 6 dígitos que se envía al celular del cliente por SMS (el PIN no se devuelve en la respuesta) y se registra el cambio en trazabilidad. Si el SMS no se puede enviar, el pedido no cambia de estado y se puede reintentar.",
+        "operationId" : "marcarPedidoListo",
+        "parameters" : [ {
+          "name" : "idPedido",
+          "in" : "path",
+          "description" : "Id del pedido",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "responses" : {
+          "400" : {
+            "description" : "El pedido no es del restaurante del empleado, no está EN_PREPARACION, el empleado no tiene restaurante asignado o el cliente no tiene celular",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es EMPLEADO",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe el pedido, el empleado o el cliente",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Usuarios, mensajería o trazabilidad no están disponibles",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pedidos/{idPedido}/entrega" : {
+      "patch" : {
+        "tags" : [ "Pedidos" ],
+        "summary" : "Entregar un pedido LISTO con el PIN",
+        "description" : "Solo el EMPLEADO. El pedido debe ser de su restaurante y estar LISTO, y el PIN debe coincidir con el que recibió el cliente por SMS. Pasa a ENTREGADO y se registra el cambio en trazabilidad. Con un PIN incorrecto el pedido no cambia.",
+        "operationId" : "entregarPedido",
+        "parameters" : [ {
+          "name" : "idPedido",
+          "in" : "path",
+          "description" : "Id del pedido",
+          "required" : true,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "example" : 1
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PedidoEntregaRequestDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "PIN ausente o con formato inválido, PIN incorrecto, el pedido no está LISTO, no es del restaurante del empleado o el empleado no tiene restaurante asignado",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Sin permiso: el rol del token no es EMPLEADO",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "No existe el pedido o el empleado",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "Usuarios o trazabilidad no están disponibles",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "No autenticado: falta el token o no es válido",
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/pedidos/{idPedido}/cancelacion" : {
       "patch" : {
         "tags" : [ "Pedidos" ],
@@ -1069,7 +1221,7 @@
       },
       "PedidoResponseDto" : {
         "type" : "object",
-        "description" : "Pedido. Lo devuelven la creación, el listado por estado, la toma de un pedido por un empleado y la cancelación. Nunca incluye el pin de entrega",
+        "description" : "Pedido. Lo devuelven la creación, el listado por estado, la toma de un pedido por un empleado, marcarlo listo, entregarlo y la cancelación. Nunca incluye el pin de entrega",
         "properties" : {
           "id" : {
             "type" : "integer",
@@ -1146,6 +1298,20 @@
           }
         },
         "required" : [ "activo" ]
+      },
+      "PedidoEntregaRequestDto" : {
+        "type" : "object",
+        "description" : "PIN de entrega que el cliente recibió por SMS",
+        "properties" : {
+          "pin" : {
+            "type" : "string",
+            "description" : "PIN de 6 dígitos",
+            "example" : "123456",
+            "minLength" : 1,
+            "pattern" : "^\\d{6}$"
+          }
+        },
+        "required" : [ "pin" ]
       }
     },
     "securitySchemes" : {

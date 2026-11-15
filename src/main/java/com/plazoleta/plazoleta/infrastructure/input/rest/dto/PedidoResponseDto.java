@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(description = "Pedido. Lo devuelven la creación, el listado por estado, la toma de un pedido por un "
-        + "empleado y la cancelación. Nunca incluye el pin de entrega")
+        + "empleado, marcarlo listo, entregarlo y la cancelación. Nunca incluye el pin de entrega")
 public record PedidoResponseDto(
         @Schema(description = "Identificador del pedido", example = "1") Long id,
         @Schema(description = "Id del cliente dueño del pedido", example = "5") Long idCliente,
